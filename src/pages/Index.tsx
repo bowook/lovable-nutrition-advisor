@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 
 interface Supplement {
   id: string;
@@ -320,7 +321,7 @@ const Index = () => {
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-2 flex items-center justify-center gap-2">
             <Pill className="w-8 h-8 text-blue-600" />
-            영양제 관리
+            💊 영양제 관리
           </h1>
           <p className="text-lg text-gray-600">영양제 과복용 예방 서비스</p>
           <p className="text-sm text-gray-500 mt-1">건강한 영양제 복용을 위한 스마트한 선택</p>
@@ -491,13 +492,13 @@ const Index = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-2">
+                  <div className="space-y-8">
                     {recommendedProducts.map((supplement, index) => (
-                      <div key={index} className="p-6 border rounded-lg bg-white hover:shadow-md transition-shadow">
-                        <h4 className="font-medium text-lg mb-2">{supplement.name}</h4>
-                        <p className="text-sm text-gray-600 mb-4">{supplement.reason}</p>
-                        <div className="space-y-3">
-                          <div>
+                      <div key={index} className="space-y-4">
+                        <div>
+                          <h4 className="font-medium text-lg mb-2">{supplement.name}</h4>
+                          <p className="text-sm text-gray-600 mb-4">{supplement.reason}</p>
+                          <div className="mb-4">
                             <p className="text-xs font-medium text-gray-500 mb-2">주요 성분:</p>
                             <div className="flex flex-wrap gap-1">
                               {supplement.ingredients.map((ingredient, idx) => (
@@ -507,24 +508,30 @@ const Index = () => {
                               ))}
                             </div>
                           </div>
-                          <div>
-                            <p className="text-xs font-medium text-gray-500 mb-2">추천 제품:</p>
-                            <div className="space-y-3">
+                        </div>
+                        
+                        <div>
+                          <p className="text-sm font-medium text-gray-700 mb-4">추천 제품:</p>
+                          <Carousel className="w-full max-w-xl mx-auto">
+                            <CarouselContent>
                               {supplement.products.map((product, idx) => (
-                                <div key={idx} className="flex items-center gap-3 p-3 bg-gray-50 rounded">
-                                  <img 
-                                    src="https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?w=100&h=100&fit=crop&crop=center" 
-                                    alt={product.name}
-                                    className="w-16 h-16 rounded-lg object-cover"
-                                  />
-                                  <div className="flex-1">
-                                    <span className="text-sm font-medium block">{product.name}</span>
-                                    <p className="text-xs text-gray-500 mt-1">온라인 쇼핑몰에서 제품명으로 검색하세요</p>
+                                <CarouselItem key={idx}>
+                                  <div className="p-1">
+                                    <Card>
+                                      <CardContent className="flex flex-col items-center justify-center p-6">
+                                        <div className="text-center">
+                                          <h5 className="font-medium text-base mb-2">{product.name}</h5>
+                                          <p className="text-sm text-gray-500">온라인 쇼핑몰에서 제품명으로 검색하세요</p>
+                                        </div>
+                                      </CardContent>
+                                    </Card>
                                   </div>
-                                </div>
+                                </CarouselItem>
                               ))}
-                            </div>
-                          </div>
+                            </CarouselContent>
+                            <CarouselPrevious />
+                            <CarouselNext />
+                          </Carousel>
                         </div>
                       </div>
                     ))}
