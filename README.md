@@ -1,73 +1,91 @@
-# Welcome to your Lovable project
+# Lovable 기능 요구사항 명세서
 
 ## Project info
 
-**URL**: https://lovable.dev/projects/b86ea994-ec80-4ad4-9ced-10b1bcc6dd16
+**프로젝트 관리 URL:**  
+<https://lovable.dev/projects/b86ea994-ec80-4ad4-9ced-10b1bcc6dd16>
 
-## How can I edit this code?
+**배포 URL:**  
+https://lovable-nutrition-advisor.lovable.app/
 
-There are several ways of editing your application.
+---
 
-**Use Lovable**
+## 1. 개요
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/b86ea994-ec80-4ad4-9ced-10b1bcc6dd16) and start prompting.
+Lovable은 영양제 과복용 예방을 위한 서비스입니다.  
+사용자가 건강을 지키고, 불필요한 지출을 줄이며, 신뢰할 수 있는 정보로 안전하게 영양제를 복용할 수 있도록 돕는 것을 목표로 합니다.
 
-Changes made via Lovable will be committed automatically to this repo.
+---
 
-**Use your preferred IDE**
+## 2. 페르소나
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- **채민수 (26세, 영양제 복용자)**
+    - 목표: 복용 중인 영양제가 과복용인지, 부족한 것이 있는지 확인
+    - 니즈: 영양제 함량 자동 계산 및 과복용 체크, 장바구니 내 과복용 여부 확인
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+- **퐁승팅 (26세, 개발자, 영양제 구매자)**
+    - 목표: 영양제 구매 시 적절한 조합 확인
+    - 니즈: 장바구니 내 과복용 여부 체크, 영양제 조합 추천
 
-Follow these steps:
+---
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## 3. 시나리오
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+### 채민수 (복용자)
+1. Lovable 서비스 실행
+2. 메인 화면에서 복용 중인 영양제 제품명 입력
+3. '적정', '주의', '위험', '부족' 상태 확인
 
-# Step 3: Install the necessary dependencies.
-npm i
+### 퐁승팅 (구매자)
+1. Lovable 접속
+2. "영양제 추천" 버튼 클릭
+3. 영양제 목록에서 제품 선택
+4. 해당 영양제 성분이 들어있는 제품 추천받기
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+---
 
-**Edit a file directly in GitHub**
+## 4. 기능 요구사항
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### 4.1 영양제 복용 상태 분석
 
-**Use GitHub Codespaces**
+- 사용자가 입력한 영양제의 성분을 분석하여 RDA(권장섭취량) 및 UL(상한섭취량) 기준으로 과복용, 부족, 적정 상태를 표시
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+#### 세부 기능
+- 영양제 제품명 입력 및 성분 정보 조회
+- 각 성분의 일일 섭취량 계산 및 RDA/UL 기준 비교
+- '적정', '주의', '위험', '부족' 상태 시각적 표시
 
-## What technologies are used for this project?
+---
 
-This project is built with:
+### 4.2 영양제 조합 추천
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+- 복용/구매 예정 영양제 조합에서 과복용 우려 없는 최적 조합 추천 및 부족 성분 보완
 
-## How can I deploy this project?
+#### 세부 기능
+- 복수 영양제 입력 및 성분 합산
+- 과복용 성분 여부 판단 및 알림
+- 부족/시너지 영양제 추천 및 대체 제안
 
-Simply open [Lovable](https://lovable.dev/projects/b86ea994-ec80-4ad4-9ced-10b1bcc6dd16) and click on Share -> Publish.
+---
 
-## Can I connect a custom domain to my Lovable project?
+## 5. 사용자 스토리 및 인수 조건
 
-Yes, you can!
+### 채민수 (복용 상태 확인)
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+- **스토리:** 현재 복용 중인 영양제의 적정량, 과복용, 부족 여부를 확인하고 싶다.
+- **인수 조건:**  
+    - Given: 로그인 후 메인 화면 접속  
+    - When: 영양제 제품명 입력  
+    - Then: 성분 분석 결과 '적정', '주의', '위험', '부족' 상태 표시
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+### 퐁승팅 (영양제 추천 및 조합 확인)
+
+- **스토리:** 복용할 영양제를 추천받고, 과복용 없는 조합을 확인하고 싶다.
+- **인수 조건:**  
+    - Given: 서비스 접속  
+    - When: "영양제 추천" 클릭  
+    - Then: 영양제 목록 제공  
+    - When: 특정 영양제 선택  
+    - Then: 해당 성분 제품 추천
+
+---
