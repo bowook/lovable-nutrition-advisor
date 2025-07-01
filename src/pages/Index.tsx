@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Plus, AlertTriangle, CheckCircle, XCircle, Minus, ExternalLink } from 'lucide-react';
+import { Search, Plus, AlertTriangle, CheckCircle, XCircle, Minus, Pill } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -234,8 +234,8 @@ const Index = () => {
         reason: '근육 기능과 신경 전달에 도움',
         ingredients: ['마그네슘 400mg'],
         products: [
-          { name: 'Now Foods 마그네슘 글리시네이트 400mg', link: 'https://kr.iherb.com/pr/Now-Foods-Magnesium-Glycinate-400-mg-180-Tablets/61332' },
-          { name: 'Doctor\'s Best 마그네슘 글리시네이트 200mg', link: 'https://kr.iherb.com/pr/Doctor-s-Best-High-Absorption-Magnesium-200-mg-240-Tablets/16567' }
+          { name: 'Now Foods 마그네슘 글리시네이트 400mg', link: '' },
+          { name: 'Doctor\'s Best 마그네슘 글리시네이트 200mg', link: '' }
         ]
       },
       '프로바이오틱스': {
@@ -243,8 +243,8 @@ const Index = () => {
         reason: '장 건강 개선에 도움',
         ingredients: ['유산균 100억 CFU'],
         products: [
-          { name: 'Garden of Life RAW 프로바이오틱스 50억 CFU', link: 'https://kr.iherb.com/pr/Garden-of-Life-RAW-Probiotics-Women-90-Vegetarian-Capsules/26829' },
-          { name: 'Jarrow Formulas 젤도필러스 35억 CFU', link: 'https://kr.iherb.com/pr/Jarrow-Formulas-Jarro-Dophilus-EPS-120-Veggie-Caps/404' }
+          { name: 'Garden of Life RAW 프로바이오틱스 50억 CFU', link: '' },
+          { name: 'Jarrow Formulas 젤도필러스 35억 CFU', link: '' }
         ]
       },
       '비타민 D': {
@@ -252,8 +252,8 @@ const Index = () => {
         reason: '뼈 건강과 면역력 증진에 도움',
         ingredients: ['비타민 D3 2000IU'],
         products: [
-          { name: 'Now Foods 비타민 D3 2000IU', link: 'https://kr.iherb.com/pr/Now-Foods-Vitamin-D-3-2-000-IU-240-Softgels/589' },
-          { name: 'Thorne 비타민 D/K2 1000IU', link: 'https://kr.iherb.com/pr/Thorne-Vitamin-D-K2-30-ml-1-fl-oz/59489' }
+          { name: 'Now Foods 비타민 D3 2000IU', link: '' },
+          { name: 'Thorne 비타민 D/K2 1000IU', link: '' }
         ]
       },
       '오메가3': {
@@ -261,8 +261,8 @@ const Index = () => {
         reason: '심혈관 건강과 뇌 기능에 도움',
         ingredients: ['EPA 300mg', 'DHA 200mg'],
         products: [
-          { name: 'Nordic Naturals 오메가-3 690mg', link: 'https://kr.iherb.com/pr/Nordic-Naturals-Omega-3-Lemon-690-mg-120-Soft-Gels/8378' },
-          { name: 'California Gold Nutrition 오메가-3 1000mg', link: 'https://kr.iherb.com/pr/California-Gold-Nutrition-Omega-3-Premium-Fish-Oil-1000-mg-240-Fish-Gelatin-Softgels/64016' }
+          { name: 'Nordic Naturals 오메가-3 690mg', link: '' },
+          { name: 'California Gold Nutrition 오메가-3 1000mg', link: '' }
         ]
       },
       '아연': {
@@ -270,8 +270,8 @@ const Index = () => {
         reason: '면역 기능과 상처 치유에 도움',
         ingredients: ['아연 15mg'],
         products: [
-          { name: 'Now Foods 아연 글루코네이트 50mg', link: 'https://kr.iherb.com/pr/Now-Foods-Zinc-Gluconate-50-mg-250-Tablets/588' },
-          { name: 'Thorne 아연 비스글리시네이트 15mg', link: 'https://kr.iherb.com/pr/Thorne-Zinc-Bisglycinate-60-Capsules/25028' }
+          { name: 'Now Foods 아연 글루코네이트 50mg', link: '' },
+          { name: 'Thorne 아연 비스글리시네이트 15mg', link: '' }
         ]
       },
       '칼슘': {
@@ -279,8 +279,8 @@ const Index = () => {
         reason: '뼈와 치아 건강에 도움',
         ingredients: ['칼슘 500mg'],
         products: [
-          { name: 'Now Foods 칼슘 & 마그네슘 500mg/250mg', link: 'https://kr.iherb.com/pr/Now-Foods-Calcium-Magnesium-500-250-mg-250-Tablets/586' },
-          { name: 'Solgar 칼슘 마그네슘 플러스 아연', link: 'https://kr.iherb.com/pr/Solgar-Calcium-Magnesium-Plus-Zinc-250-Tablets/10405' }
+          { name: 'Now Foods 칼슘 & 마그네슘 500mg/250mg', link: '' },
+          { name: 'Solgar 칼슘 마그네슘 플러스 아연', link: '' }
         ]
       },
       '루테인': {
@@ -288,8 +288,8 @@ const Index = () => {
         reason: '눈 건강과 황반 보호에 도움',
         ingredients: ['루테인 20mg'],
         products: [
-          { name: 'Doctor\'s Best 루테인 20mg', link: 'https://kr.iherb.com/pr/Doctor-s-Best-Lutein-with-Optilut-10-mg-120-Veggie-Caps/10' },
-          { name: 'Now Foods 루테인 10mg', link: 'https://kr.iherb.com/pr/Now-Foods-Lutein-10-mg-120-Softgels/593' }
+          { name: 'Doctor\'s Best 루테인 20mg', link: '' },
+          { name: 'Now Foods 루테인 10mg', link: '' }
         ]
       }
     };
@@ -318,7 +318,10 @@ const Index = () => {
       <div className="container mx-auto px-4 py-8">
         {/* 헤더 */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">영양제 관리</h1>
+          <h1 className="text-4xl font-bold text-gray-900 mb-2 flex items-center justify-center gap-2">
+            <Pill className="w-8 h-8 text-blue-600" />
+            영양제 관리
+          </h1>
           <p className="text-lg text-gray-600">영양제 과복용 예방 서비스</p>
           <p className="text-sm text-gray-500 mt-1">건강한 영양제 복용을 위한 스마트한 선택</p>
         </div>
@@ -506,19 +509,18 @@ const Index = () => {
                           </div>
                           <div>
                             <p className="text-xs font-medium text-gray-500 mb-2">추천 제품:</p>
-                            <div className="space-y-2">
+                            <div className="space-y-3">
                               {supplement.products.map((product, idx) => (
-                                <div key={idx} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                                  <span className="text-sm font-medium">{product.name}</span>
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => window.open(product.link, '_blank')}
-                                    className="ml-2"
-                                  >
-                                    <ExternalLink className="w-3 h-3 mr-1" />
-                                    구매
-                                  </Button>
+                                <div key={idx} className="flex items-center gap-3 p-3 bg-gray-50 rounded">
+                                  <img 
+                                    src="https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?w=100&h=100&fit=crop&crop=center" 
+                                    alt={product.name}
+                                    className="w-16 h-16 rounded-lg object-cover"
+                                  />
+                                  <div className="flex-1">
+                                    <span className="text-sm font-medium block">{product.name}</span>
+                                    <p className="text-xs text-gray-500 mt-1">온라인 쇼핑몰에서 제품명으로 검색하세요</p>
+                                  </div>
                                 </div>
                               ))}
                             </div>
