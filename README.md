@@ -10,6 +10,13 @@ https://lovable-nutrition-advisor.lovable.app/
 
 ---
 
+## 샘플 이미지
+
+![영양소 복용 상태 분석 화면](https://github.com/user-attachments/assets/d372d1a4-a1cb-4eaa-94ef-16c36e7e5444)
+![영양소 제품 추천 화면](https://github.com/user-attachments/assets/4e3c1013-4738-481c-9e11-db70e8cc2bf9)
+
+---
+
 ## 1. 개요
 
 Lovable은 영양제 과복용 예방을 위한 서비스입니다.  
