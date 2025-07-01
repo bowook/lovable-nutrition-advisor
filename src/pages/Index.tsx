@@ -34,7 +34,8 @@ interface RecommendedProduct {
 const Index = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSupplements, setSelectedSupplements] = useState<Supplement[]>([]);
-  const [showRecommendations, setShowRecommendations] = useState(false);
+  const [recommendationSearch, setRecommendationSearch] = useState('');
+  const [recommendedProducts, setRecommendedProducts] = useState<RecommendedProduct[]>([]);
 
   // 확장된 영양제 데이터
   const sampleSupplements: Supplement[] = [
@@ -224,48 +225,100 @@ const Index = () => {
     setSelectedSupplements(selectedSupplements.filter(s => s.id !== id));
   };
 
+  const searchRecommendations = () => {
+    if (!recommendationSearch.trim()) return;
+
+    const nutrientRecommendations: { [key: string]: RecommendedProduct } = {
+      '마그네슘': {
+        name: '마그네슘',
+        reason: '근육 기능과 신경 전달에 도움',
+        ingredients: ['마그네슘 400mg'],
+        products: [
+          { name: 'Now Foods 마그네슘 글리시네이트 400mg', link: 'https://kr.iherb.com/pr/Now-Foods-Magnesium-Glycinate-400-mg-180-Tablets/61332' },
+          { name: 'Doctor\'s Best 마그네슘 글리시네이트 200mg', link: 'https://kr.iherb.com/pr/Doctor-s-Best-High-Absorption-Magnesium-200-mg-240-Tablets/16567' }
+        ]
+      },
+      '프로바이오틱스': {
+        name: '프로바이오틱스',
+        reason: '장 건강 개선에 도움',
+        ingredients: ['유산균 100억 CFU'],
+        products: [
+          { name: 'Garden of Life RAW 프로바이오틱스 50억 CFU', link: 'https://kr.iherb.com/pr/Garden-of-Life-RAW-Probiotics-Women-90-Vegetarian-Capsules/26829' },
+          { name: 'Jarrow Formulas 젤도필러스 35억 CFU', link: 'https://kr.iherb.com/pr/Jarrow-Formulas-Jarro-Dophilus-EPS-120-Veggie-Caps/404' }
+        ]
+      },
+      '비타민 D': {
+        name: '비타민 D',
+        reason: '뼈 건강과 면역력 증진에 도움',
+        ingredients: ['비타민 D3 2000IU'],
+        products: [
+          { name: 'Now Foods 비타민 D3 2000IU', link: 'https://kr.iherb.com/pr/Now-Foods-Vitamin-D-3-2-000-IU-240-Softgels/589' },
+          { name: 'Thorne 비타민 D/K2 1000IU', link: 'https://kr.iherb.com/pr/Thorne-Vitamin-D-K2-30-ml-1-fl-oz/59489' }
+        ]
+      },
+      '오메가3': {
+        name: '오메가-3',
+        reason: '심혈관 건강과 뇌 기능에 도움',
+        ingredients: ['EPA 300mg', 'DHA 200mg'],
+        products: [
+          { name: 'Nordic Naturals 오메가-3 690mg', link: 'https://kr.iherb.com/pr/Nordic-Naturals-Omega-3-Lemon-690-mg-120-Soft-Gels/8378' },
+          { name: 'California Gold Nutrition 오메가-3 1000mg', link: 'https://kr.iherb.com/pr/California-Gold-Nutrition-Omega-3-Premium-Fish-Oil-1000-mg-240-Fish-Gelatin-Softgels/64016' }
+        ]
+      },
+      '아연': {
+        name: '아연',
+        reason: '면역 기능과 상처 치유에 도움',
+        ingredients: ['아연 15mg'],
+        products: [
+          { name: 'Now Foods 아연 글루코네이트 50mg', link: 'https://kr.iherb.com/pr/Now-Foods-Zinc-Gluconate-50-mg-250-Tablets/588' },
+          { name: 'Thorne 아연 비스글리시네이트 15mg', link: 'https://kr.iherb.com/pr/Thorne-Zinc-Bisglycinate-60-Capsules/25028' }
+        ]
+      },
+      '칼슘': {
+        name: '칼슘',
+        reason: '뼈와 치아 건강에 도움',
+        ingredients: ['칼슘 500mg'],
+        products: [
+          { name: 'Now Foods 칼슘 & 마그네슘 500mg/250mg', link: 'https://kr.iherb.com/pr/Now-Foods-Calcium-Magnesium-500-250-mg-250-Tablets/586' },
+          { name: 'Solgar 칼슘 마그네슘 플러스 아연', link: 'https://kr.iherb.com/pr/Solgar-Calcium-Magnesium-Plus-Zinc-250-Tablets/10405' }
+        ]
+      },
+      '루테인': {
+        name: '루테인',
+        reason: '눈 건강과 황반 보호에 도움',
+        ingredients: ['루테인 20mg'],
+        products: [
+          { name: 'Doctor\'s Best 루테인 20mg', link: 'https://kr.iherb.com/pr/Doctor-s-Best-Lutein-with-Optilut-10-mg-120-Veggie-Caps/10' },
+          { name: 'Now Foods 루테인 10mg', link: 'https://kr.iherb.com/pr/Now-Foods-Lutein-10-mg-120-Softgels/593' }
+        ]
+      }
+    };
+
+    const searchTerm = recommendationSearch.toLowerCase();
+    const matchedProducts: RecommendedProduct[] = [];
+
+    Object.keys(nutrientRecommendations).forEach(key => {
+      if (key.toLowerCase().includes(searchTerm) || 
+          nutrientRecommendations[key].name.toLowerCase().includes(searchTerm)) {
+        matchedProducts.push(nutrientRecommendations[key]);
+      }
+    });
+
+    setRecommendedProducts(matchedProducts);
+  };
+
   const filteredSupplements = sampleSupplements.filter(supplement =>
     supplement.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const nutrientStatus = calculateNutrientStatus();
 
-  const recommendedSupplements: RecommendedProduct[] = [
-    { 
-      name: '마그네슘', 
-      reason: '근육 기능과 신경 전달에 도움', 
-      ingredients: ['마그네슘 400mg'],
-      products: [
-        { name: '나우푸드 마그네슘 글리시네이트', link: 'https://www.iherb.com/pr/now-foods-magnesium-glycinate-180-tablets/61332' },
-        { name: '솔가 마그네슘 400mg', link: 'https://www.iherb.com/pr/solgar-magnesium-400-mg-100-vegetable-capsules/10405' }
-      ]
-    },
-    { 
-      name: '프로바이오틱스', 
-      reason: '장 건강 개선에 도움', 
-      ingredients: ['유산균 100억 CFU'],
-      products: [
-        { name: '가든오브라이프 RAW 프로바이오틱스', link: 'https://www.iherb.com/pr/garden-of-life-raw-probiotics-men-90-vegetarian-capsules/26828' },
-        { name: '자로우 젤도필러스', link: 'https://www.iherb.com/pr/jarrow-formulas-jarro-dophilus-eps-120-veggie-caps/404' }
-      ]
-    },
-    { 
-      name: '코엔자임 Q10', 
-      reason: '심혈관 건강에 도움', 
-      ingredients: ['코엔자임 Q10 100mg'],
-      products: [
-        { name: '닥터스 베스트 CoQ10', link: 'https://www.iherb.com/pr/doctor-s-best-high-absorption-coq10-100-mg-120-veggie-caps/10' },
-        { name: '라이프 익스텐션 Super Ubiquinol CoQ10', link: 'https://www.iherb.com/pr/life-extension-super-ubiquinol-coq10-100-mg-60-softgels/37077' }
-      ]
-    }
-  ];
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50">
       <div className="container mx-auto px-4 py-8">
         {/* 헤더 */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Lovable 영양제 관리</h1>
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">영양제 관리</h1>
           <p className="text-lg text-gray-600">영양제 과복용 예방 서비스</p>
           <p className="text-sm text-gray-500 mt-1">건강한 영양제 복용을 위한 스마트한 선택</p>
         </div>
@@ -402,53 +455,81 @@ const Index = () => {
           <TabsContent value="recommendations" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>추천 영양제</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <Search className="w-5 h-5" />
+                  영양제 추천 검색
+                </CardTitle>
                 <CardDescription>
-                  건강한 생활을 위해 추천하는 영양제들입니다
+                  원하는 영양제나 성분을 입력하여 제품을 추천받으세요
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-2">
-                  {recommendedSupplements.map((supplement, index) => (
-                    <div key={index} className="p-6 border rounded-lg bg-white hover:shadow-md transition-shadow">
-                      <h4 className="font-medium text-lg mb-2">{supplement.name}</h4>
-                      <p className="text-sm text-gray-600 mb-4">{supplement.reason}</p>
-                      <div className="space-y-3">
-                        <div>
-                          <p className="text-xs font-medium text-gray-500 mb-2">주요 성분:</p>
-                          <div className="flex flex-wrap gap-1">
-                            {supplement.ingredients.map((ingredient, idx) => (
-                              <Badge key={idx} variant="secondary" className="text-xs">
-                                {ingredient}
-                              </Badge>
-                            ))}
-                          </div>
-                        </div>
-                        <div>
-                          <p className="text-xs font-medium text-gray-500 mb-2">추천 제품:</p>
-                          <div className="space-y-2">
-                            {supplement.products.map((product, idx) => (
-                              <div key={idx} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                                <span className="text-sm font-medium">{product.name}</span>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => window.open(product.link, '_blank')}
-                                  className="ml-2"
-                                >
-                                  <ExternalLink className="w-3 h-3 mr-1" />
-                                  구매
-                                </Button>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                <div className="flex gap-2 mb-4">
+                  <Input
+                    placeholder="영양제 이름을 입력하세요 (예: 마그네슘, 프로바이오틱스, 비타민D, 오메가3, 아연, 칼슘, 루테인)"
+                    value={recommendationSearch}
+                    onChange={(e) => setRecommendationSearch(e.target.value)}
+                    className="flex-1"
+                  />
+                  <Button onClick={searchRecommendations}>
+                    <Search className="w-4 h-4 mr-1" />
+                    검색
+                  </Button>
                 </div>
               </CardContent>
             </Card>
+
+            {recommendedProducts.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>추천 제품</CardTitle>
+                  <CardDescription>
+                    검색하신 영양제에 대한 추천 제품입니다
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-2">
+                    {recommendedProducts.map((supplement, index) => (
+                      <div key={index} className="p-6 border rounded-lg bg-white hover:shadow-md transition-shadow">
+                        <h4 className="font-medium text-lg mb-2">{supplement.name}</h4>
+                        <p className="text-sm text-gray-600 mb-4">{supplement.reason}</p>
+                        <div className="space-y-3">
+                          <div>
+                            <p className="text-xs font-medium text-gray-500 mb-2">주요 성분:</p>
+                            <div className="flex flex-wrap gap-1">
+                              {supplement.ingredients.map((ingredient, idx) => (
+                                <Badge key={idx} variant="secondary" className="text-xs">
+                                  {ingredient}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                          <div>
+                            <p className="text-xs font-medium text-gray-500 mb-2">추천 제품:</p>
+                            <div className="space-y-2">
+                              {supplement.products.map((product, idx) => (
+                                <div key={idx} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                                  <span className="text-sm font-medium">{product.name}</span>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => window.open(product.link, '_blank')}
+                                    className="ml-2"
+                                  >
+                                    <ExternalLink className="w-3 h-3 mr-1" />
+                                    구매
+                                  </Button>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
         </Tabs>
       </div>
