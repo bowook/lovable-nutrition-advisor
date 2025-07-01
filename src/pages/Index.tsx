@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { Search, Plus, AlertTriangle, CheckCircle, XCircle, Minus } from 'lucide-react';
+import { Search, Plus, AlertTriangle, CheckCircle, XCircle, Minus, ExternalLink } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,12 +21,22 @@ interface NutrientStatus {
   unit: string;
 }
 
+interface RecommendedProduct {
+  name: string;
+  reason: string;
+  ingredients: string[];
+  products: {
+    name: string;
+    link: string;
+  }[];
+}
+
 const Index = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSupplements, setSelectedSupplements] = useState<Supplement[]>([]);
   const [showRecommendations, setShowRecommendations] = useState(false);
 
-  // 샘플 영양제 데이터
+  // 확장된 영양제 데이터
   const sampleSupplements: Supplement[] = [
     {
       id: '1',
@@ -35,7 +44,9 @@ const Index = () => {
       ingredients: [
         { name: '비타민 C', amount: '1000', unit: 'mg' },
         { name: '비타민 D', amount: '400', unit: 'IU' },
-        { name: '비타민 B12', amount: '50', unit: 'mcg' }
+        { name: '비타민 B12', amount: '50', unit: 'mcg' },
+        { name: '아연', amount: '15', unit: 'mg' },
+        { name: '칼슘', amount: '200', unit: 'mg' }
       ]
     },
     {
@@ -52,17 +63,53 @@ const Index = () => {
         { name: 'EPA', amount: '300', unit: 'mg' },
         { name: 'DHA', amount: '200', unit: 'mg' }
       ]
+    },
+    {
+      id: '4',
+      name: '아연 보충제',
+      ingredients: [
+        { name: '아연', amount: '20', unit: 'mg' }
+      ]
+    },
+    {
+      id: '5',
+      name: '칼슘 + 마그네슘',
+      ingredients: [
+        { name: '칼슘', amount: '500', unit: 'mg' },
+        { name: '마그네슘', amount: '250', unit: 'mg' }
+      ]
+    },
+    {
+      id: '6',
+      name: '루테인 20mg',
+      ingredients: [
+        { name: '루테인', amount: '20', unit: 'mg' }
+      ]
+    },
+    {
+      id: '7',
+      name: '마그네슘 400',
+      ingredients: [
+        { name: '마그네슘', amount: '400', unit: 'mg' }
+      ]
+    },
+    {
+      id: '8',
+      name: '비타민 D3 1000IU',
+      ingredients: [
+        { name: '비타민 D', amount: '1000', unit: 'IU' }
+      ]
     }
   ];
 
-  // 영양소 상태 계산 (샘플)
+  // 확장된 영양소 상태 계산
   const calculateNutrientStatus = (): NutrientStatus[] => {
     const nutrients: NutrientStatus[] = [
       {
         name: '비타민 C',
         current: selectedSupplements.reduce((sum, sup) => {
-          const vitC = sup.ingredients.find(ing => ing.name === '비타민 C');
-          return sum + (vitC ? parseInt(vitC.amount) : 0);
+          const nutrient = sup.ingredients.find(ing => ing.name === '비타민 C');
+          return sum + (nutrient ? parseInt(nutrient.amount) : 0);
         }, 0),
         rda: 100,
         ul: 2000,
@@ -72,13 +119,57 @@ const Index = () => {
       {
         name: '비타민 D',
         current: selectedSupplements.reduce((sum, sup) => {
-          const vitD = sup.ingredients.find(ing => ing.name === '비타민 D');
-          return sum + (vitD ? parseInt(vitD.amount) : 0);
+          const nutrient = sup.ingredients.find(ing => ing.name === '비타민 D');
+          return sum + (nutrient ? parseInt(nutrient.amount) : 0);
         }, 0),
         rda: 600,
         ul: 4000,
         status: 'adequate',
         unit: 'IU'
+      },
+      {
+        name: '아연',
+        current: selectedSupplements.reduce((sum, sup) => {
+          const nutrient = sup.ingredients.find(ing => ing.name === '아연');
+          return sum + (nutrient ? parseInt(nutrient.amount) : 0);
+        }, 0),
+        rda: 8,
+        ul: 40,
+        status: 'adequate',
+        unit: 'mg'
+      },
+      {
+        name: '칼슘',
+        current: selectedSupplements.reduce((sum, sup) => {
+          const nutrient = sup.ingredients.find(ing => ing.name === '칼슘');
+          return sum + (nutrient ? parseInt(nutrient.amount) : 0);
+        }, 0),
+        rda: 1000,
+        ul: 2500,
+        status: 'adequate',
+        unit: 'mg'
+      },
+      {
+        name: '마그네슘',
+        current: selectedSupplements.reduce((sum, sup) => {
+          const nutrient = sup.ingredients.find(ing => ing.name === '마그네슘');
+          return sum + (nutrient ? parseInt(nutrient.amount) : 0);
+        }, 0),
+        rda: 400,
+        ul: 350,
+        status: 'adequate',
+        unit: 'mg'
+      },
+      {
+        name: '루테인',
+        current: selectedSupplements.reduce((sum, sup) => {
+          const nutrient = sup.ingredients.find(ing => ing.name === '루테인');
+          return sum + (nutrient ? parseInt(nutrient.amount) : 0);
+        }, 0),
+        rda: 10,
+        ul: 20,
+        status: 'adequate',
+        unit: 'mg'
       }
     ];
 
@@ -139,10 +230,34 @@ const Index = () => {
 
   const nutrientStatus = calculateNutrientStatus();
 
-  const recommendedSupplements = [
-    { name: '마그네슘', reason: '근육 기능과 신경 전달에 도움', ingredients: ['마그네슘 400mg'] },
-    { name: '프로바이오틱스', reason: '장 건강 개선에 도움', ingredients: ['유산균 100억 CFU'] },
-    { name: '코엔자임 Q10', reason: '심혈관 건강에 도움', ingredients: ['코엔자임 Q10 100mg'] }
+  const recommendedSupplements: RecommendedProduct[] = [
+    { 
+      name: '마그네슘', 
+      reason: '근육 기능과 신경 전달에 도움', 
+      ingredients: ['마그네슘 400mg'],
+      products: [
+        { name: '나우푸드 마그네슘 글리시네이트', link: 'https://www.iherb.com/pr/now-foods-magnesium-glycinate-180-tablets/61332' },
+        { name: '솔가 마그네슘 400mg', link: 'https://www.iherb.com/pr/solgar-magnesium-400-mg-100-vegetable-capsules/10405' }
+      ]
+    },
+    { 
+      name: '프로바이오틱스', 
+      reason: '장 건강 개선에 도움', 
+      ingredients: ['유산균 100억 CFU'],
+      products: [
+        { name: '가든오브라이프 RAW 프로바이오틱스', link: 'https://www.iherb.com/pr/garden-of-life-raw-probiotics-men-90-vegetarian-capsules/26828' },
+        { name: '자로우 젤도필러스', link: 'https://www.iherb.com/pr/jarrow-formulas-jarro-dophilus-eps-120-veggie-caps/404' }
+      ]
+    },
+    { 
+      name: '코엔자임 Q10', 
+      reason: '심혈관 건강에 도움', 
+      ingredients: ['코엔자임 Q10 100mg'],
+      products: [
+        { name: '닥터스 베스트 CoQ10', link: 'https://www.iherb.com/pr/doctor-s-best-high-absorption-coq10-100-mg-120-veggie-caps/10' },
+        { name: '라이프 익스텐션 Super Ubiquinol CoQ10', link: 'https://www.iherb.com/pr/life-extension-super-ubiquinol-coq10-100-mg-60-softgels/37077' }
+      ]
+    }
   ];
 
   return (
@@ -150,7 +265,7 @@ const Index = () => {
       <div className="container mx-auto px-4 py-8">
         {/* 헤더 */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Lovable</h1>
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">Lovable 영양제 관리</h1>
           <p className="text-lg text-gray-600">영양제 과복용 예방 서비스</p>
           <p className="text-sm text-gray-500 mt-1">건강한 영양제 복용을 위한 스마트한 선택</p>
         </div>
@@ -176,7 +291,7 @@ const Index = () => {
               <CardContent>
                 <div className="flex gap-2 mb-4">
                   <Input
-                    placeholder="영양제 이름을 입력하세요 (예: 종합비타민)"
+                    placeholder="영양제 이름을 입력하세요 (예: 종합비타민, 아연, 칼슘, 마그네슘, 루테인)"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="flex-1"
@@ -249,7 +364,7 @@ const Index = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid gap-4 md:grid-cols-2">
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                     {nutrientStatus.map((nutrient) => (
                       <div key={nutrient.name} className="p-4 border rounded-lg bg-white">
                         <div className="flex items-center justify-between mb-2">
@@ -293,18 +408,41 @@ const Index = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-2">
                   {recommendedSupplements.map((supplement, index) => (
-                    <div key={index} className="p-4 border rounded-lg bg-white hover:shadow-md transition-shadow">
+                    <div key={index} className="p-6 border rounded-lg bg-white hover:shadow-md transition-shadow">
                       <h4 className="font-medium text-lg mb-2">{supplement.name}</h4>
-                      <p className="text-sm text-gray-600 mb-3">{supplement.reason}</p>
-                      <div className="space-y-1">
-                        <p className="text-xs font-medium text-gray-500">주요 성분:</p>
-                        {supplement.ingredients.map((ingredient, idx) => (
-                          <Badge key={idx} variant="secondary" className="text-xs">
-                            {ingredient}
-                          </Badge>
-                        ))}
+                      <p className="text-sm text-gray-600 mb-4">{supplement.reason}</p>
+                      <div className="space-y-3">
+                        <div>
+                          <p className="text-xs font-medium text-gray-500 mb-2">주요 성분:</p>
+                          <div className="flex flex-wrap gap-1">
+                            {supplement.ingredients.map((ingredient, idx) => (
+                              <Badge key={idx} variant="secondary" className="text-xs">
+                                {ingredient}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                        <div>
+                          <p className="text-xs font-medium text-gray-500 mb-2">추천 제품:</p>
+                          <div className="space-y-2">
+                            {supplement.products.map((product, idx) => (
+                              <div key={idx} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                                <span className="text-sm font-medium">{product.name}</span>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => window.open(product.link, '_blank')}
+                                  className="ml-2"
+                                >
+                                  <ExternalLink className="w-3 h-3 mr-1" />
+                                  구매
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   ))}
