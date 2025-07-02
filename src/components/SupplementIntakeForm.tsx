@@ -43,10 +43,11 @@ const SupplementIntakeForm = ({ supplements, onIntakeUpdate }: SupplementIntakeF
     onIntakeUpdate(updatedIntakes);
   };
 
-  const updateIntake = (id: string, pillsPerDay: number, timesPerDay: number) => {
+  const updateIntake = (id: string, pillsPerDay: number, timesPerDay: number, newIngredients?: any[]) => {
     const updatedIntakes = intakes.map(intake => {
       if (intake.id === id) {
-        const updatedIngredients = intake.ingredients.map(ing => ({
+        const ingredientsToUse = newIngredients || intake.ingredients;
+        const updatedIngredients = ingredientsToUse.map((ing: any) => ({
           ...ing,
           dailyAmount: ing.amount * pillsPerDay * timesPerDay
         }));
@@ -110,7 +111,7 @@ const SupplementIntakeForm = ({ supplements, onIntakeUpdate }: SupplementIntakeF
         <Card>
           <CardHeader>
             <CardTitle>복용량 설정</CardTitle>
-            <CardDescription>정확한 복용량을 입력해주세요</CardDescription>
+            <CardDescription>정확한 복용량과 함량을 입력해주세요</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -141,7 +142,7 @@ const SupplementIntakeForm = ({ supplements, onIntakeUpdate }: SupplementIntakeF
                   {editingId === intake.id ? (
                     <EditIntakeForm
                       intake={intake}
-                      onSave={(pillsPerDay, timesPerDay) => updateIntake(intake.id, pillsPerDay, timesPerDay)}
+                      onSave={(pillsPerDay, timesPerDay, ingredients) => updateIntake(intake.id, pillsPerDay, timesPerDay, ingredients)}
                       onCancel={() => setEditingId(null)}
                     />
                   ) : (
@@ -175,11 +176,24 @@ const SupplementIntakeForm = ({ supplements, onIntakeUpdate }: SupplementIntakeF
 
 const EditIntakeForm = ({ intake, onSave, onCancel }: {
   intake: SupplementIntake;
-  onSave: (pillsPerDay: number, timesPerDay: number) => void;
+  onSave: (pillsPerDay: number, timesPerDay: number, ingredients: any[]) => void;
   onCancel: () => void;
 }) => {
   const [pillsPerDay, setPillsPerDay] = useState(intake.pillsPerDay);
   const [timesPerDay, setTimesPerDay] = useState(intake.timesPerDay);
+  const [ingredients, setIngredients] = useState(intake.ingredients.map(ing => ({
+    ...ing,
+    amount: ing.amount // 현재 함량 값
+  })));
+
+  const updateIngredientAmount = (index: number, newAmount: number) => {
+    const updatedIngredients = [...ingredients];
+    updatedIngredients[index] = {
+      ...updatedIngredients[index],
+      amount: newAmount
+    };
+    setIngredients(updatedIngredients);
+  };
 
   return (
     <div className="space-y-4 p-3 bg-gray-50 rounded">
@@ -206,11 +220,30 @@ const EditIntakeForm = ({ intake, onSave, onCancel }: {
           />
         </div>
       </div>
+
+      <div>
+        <Label className="text-sm font-medium mb-2 block">성분별 함량 수정</Label>
+        <div className="space-y-2">
+          {ingredients.map((ing, index) => (
+            <div key={index} className="grid grid-cols-3 gap-2 items-center">
+              <span className="text-sm">{ing.name}</span>
+              <Input
+                type="number"
+                min="0"
+                value={ing.amount}
+                onChange={(e) => updateIngredientAmount(index, parseInt(e.target.value) || 0)}
+                className="text-sm"
+              />
+              <span className="text-sm text-gray-500">{ing.unit}</span>
+            </div>
+          ))}
+        </div>
+      </div>
       
       <div className="text-sm text-gray-600">
         <strong>예상 1일 섭취량:</strong>
         <div className="mt-1 flex flex-wrap gap-1">
-          {intake.ingredients.map((ing, idx) => (
+          {ingredients.map((ing, idx) => (
             <Badge key={idx} variant="outline" className="text-xs">
               {ing.name} {ing.amount * pillsPerDay * timesPerDay}{ing.unit}
             </Badge>
@@ -219,7 +252,7 @@ const EditIntakeForm = ({ intake, onSave, onCancel }: {
       </div>
 
       <div className="flex gap-2">
-        <Button size="sm" onClick={() => onSave(pillsPerDay, timesPerDay)}>
+        <Button size="sm" onClick={() => onSave(pillsPerDay, timesPerDay, ingredients)}>
           저장
         </Button>
         <Button size="sm" variant="outline" onClick={onCancel}>

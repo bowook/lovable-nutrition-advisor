@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Search, Plus, AlertTriangle, CheckCircle, XCircle, Minus, Pill, Info, ShoppingBag, Star, Award } from 'lucide-react';
 import { Button } from "@/components/ui/button";
@@ -21,7 +20,7 @@ interface NutrientStatus {
   current: number;
   rda: number;
   ul: number;
-  status: 'adequate' | 'caution' | 'danger' | 'deficient';
+  status: 'adequate' | 'danger' | 'deficient';
   unit: string;
   percentage: number;
 }
@@ -107,7 +106,7 @@ const Index = () => {
     }
   ];
 
-  // 영양소 상태 계산
+  // 영양소 상태 계산 - 3가지 상태만 사용
   const calculateNutrientStatus = (): NutrientStatus[] => {
     const baseNutrients = [
       { name: '비타민 C', rda: 100, ul: 2000, unit: 'mg' },
@@ -132,10 +131,13 @@ const Index = () => {
       const percentage = Math.round((current / baseNutrient.rda) * 100);
       
       let status: NutrientStatus['status'] = 'adequate';
-      if (current === 0) status = 'deficient';
-      else if (current > baseNutrient.ul) status = 'danger';
-      else if (current > baseNutrient.rda * 1.5) status = 'caution';
-      else if (current < baseNutrient.rda * 0.8) status = 'deficient';
+      if (current < baseNutrient.rda) {
+        status = 'deficient'; // 권장량 미만: 부족
+      } else if (current > baseNutrient.ul) {
+        status = 'danger'; // 상한량 초과: 위험
+      } else {
+        status = 'adequate'; // 권장량~상한량: 적정
+      }
       
       return {
         ...baseNutrient,

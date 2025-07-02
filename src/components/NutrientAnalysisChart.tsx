@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, ReferenceLine } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer } from 'recharts';
 import { AlertTriangle, CheckCircle, XCircle, Minus, TrendingUp, Pill, ArrowLeft } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 
@@ -13,7 +13,7 @@ interface NutrientStatus {
   current: number;
   rda: number;
   ul: number;
-  status: 'adequate' | 'caution' | 'danger' | 'deficient';
+  status: 'adequate' | 'danger' | 'deficient';
   unit: string;
   percentage: number;
 }
@@ -29,27 +29,17 @@ const NutrientAnalysisChart = ({ nutrientStatus, onRecommendationRequest }: Nutr
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'danger': return '#ef4444';
-      case 'caution': return '#f59e0b';
       case 'adequate': return '#10b981';
       case 'deficient': return '#f97316';
       default: return '#6b7280';
     }
   };
 
-  const getLineColor = (nutrient: NutrientStatus) => {
-    if (nutrient.current === 0) return '#f97316'; // 주황색 - 부족
-    if (nutrient.current > nutrient.ul) return '#ef4444'; // 빨간색 - 위험
-    if (nutrient.current >= nutrient.rda && nutrient.current <= nutrient.ul) return '#10b981'; // 초록색 - 적정
-    if (nutrient.current < nutrient.rda) return '#f97316'; // 주황색 - 부족
-    return '#10b981';
-  };
-
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'danger': return <XCircle className="w-4 h-4" />;
-      case 'caution': return <AlertTriangle className="w-4 h-4" />;
       case 'adequate': return <CheckCircle className="w-4 h-4" />;
-      case 'deficient': return <Minus className="w-4 h-4" />;
+      case 'deficient': return <AlertTriangle className="w-4 h-4" />;
       default: return <Minus className="w-4 h-4" />;
     }
   };
@@ -57,7 +47,6 @@ const NutrientAnalysisChart = ({ nutrientStatus, onRecommendationRequest }: Nutr
   const getStatusText = (status: string) => {
     switch (status) {
       case 'danger': return '위험';
-      case 'caution': return '주의';
       case 'adequate': return '적정';
       case 'deficient': return '부족';
       default: return '알 수 없음';
@@ -78,12 +67,24 @@ const NutrientAnalysisChart = ({ nutrientStatus, onRecommendationRequest }: Nutr
     }
   };
 
-  // 개별 영양소 그래프 데이터 생성
+  // 개별 영양소 막대 그래프 데이터 생성
   const generateIndividualChartData = (nutrient: NutrientStatus) => {
     return [
-      { name: '현재 섭취량', value: nutrient.current, color: getLineColor(nutrient) },
-      { name: '권장 섭취량', value: nutrient.rda, color: '#10b981' },
-      { name: '상한 섭취량', value: nutrient.ul, color: '#ef4444' }
+      { 
+        name: '현재 섭취량', 
+        value: nutrient.current, 
+        fill: getStatusColor(nutrient.status)
+      },
+      { 
+        name: '권장 섭취량', 
+        value: nutrient.rda, 
+        fill: '#10b981'
+      },
+      { 
+        name: '상한 섭취량', 
+        value: nutrient.ul, 
+        fill: '#ef4444'
+      }
     ];
   };
 
@@ -111,67 +112,74 @@ const NutrientAnalysisChart = ({ nutrientStatus, onRecommendationRequest }: Nutr
           </CardDescription>
         </CardHeader>
         <CardContent className="p-6">
-          <div className="mb-6">
-            <ChartContainer
-              config={{
-                value: { label: "섭취량", color: getLineColor(selectedNutrient) }
-              }}
-              className="h-[300px]"
-            >
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-                  <XAxis dataKey="name" fontSize={12} />
-                  <YAxis label={{ value: `${selectedNutrient.unit}`, angle: -90, position: 'insideLeft' }} />
-                  <ChartTooltip 
-                    content={({ active, payload, label }) => {
-                      if (active && payload && payload.length) {
-                        const data = payload[0].payload;
-                        return (
-                          <div className="bg-white p-3 border rounded shadow-lg">
-                            <p className="font-semibold">{label}</p>
-                            <p className="text-sm" style={{color: data.color}}>
-                              {data.value}{selectedNutrient.unit}
-                            </p>
-                          </div>
-                        );
-                      }
-                      return null;
-                    }}
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="value" 
-                    stroke={getLineColor(selectedNutrient)}
-                    strokeWidth={3}
-                    dot={{ r: 8, fill: getLineColor(selectedNutrient) }}
-                    activeDot={{ r: 10 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </ChartContainer>
-          </div>
-          
-          <div className="grid gap-4">
-            <div className="flex justify-between items-center p-3 bg-gray-50 rounded">
-              <span className="font-medium">현재 섭취량:</span>
-              <span className="font-bold">{selectedNutrient.current}{selectedNutrient.unit}</span>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* 막대 그래프 */}
+            <div className="h-[300px]">
+              <ChartContainer
+                config={{
+                  value: { label: "섭취량", color: getStatusColor(selectedNutrient.status) }
+                }}
+                className="h-full"
+              >
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+                    <XAxis 
+                      dataKey="name" 
+                      fontSize={12} 
+                      angle={-45}
+                      textAnchor="end"
+                      height={80}
+                    />
+                    <YAxis 
+                      label={{ value: `${selectedNutrient.unit}`, angle: -90, position: 'insideLeft' }} 
+                    />
+                    <ChartTooltip 
+                      content={({ active, payload, label }) => {
+                        if (active && payload && payload.length) {
+                          const data = payload[0].payload;
+                          return (
+                            <div className="bg-white p-3 border rounded shadow-lg">
+                              <p className="font-semibold">{label}</p>
+                              <p className="text-sm" style={{color: data.fill}}>
+                                {data.value}{selectedNutrient.unit}
+                              </p>
+                            </div>
+                          );
+                        }
+                        return null;
+                      }}
+                    />
+                    <Bar 
+                      dataKey="value" 
+                      radius={[4, 4, 0, 0]}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </ChartContainer>
             </div>
-            <div className="flex justify-between items-center p-3 bg-green-50 rounded">
-              <span className="font-medium">권장 섭취량:</span>
-              <span className="font-bold text-green-700">{selectedNutrient.rda}{selectedNutrient.unit}</span>
-            </div>
-            <div className="flex justify-between items-center p-3 bg-red-50 rounded">
-              <span className="font-medium">상한 섭취량:</span>
-              <span className="font-bold text-red-700">{selectedNutrient.ul}{selectedNutrient.unit}</span>
-            </div>
-            <div className="flex justify-between items-center p-3 bg-blue-50 rounded">
-              <span className="font-medium">달성률:</span>
-              <div className="flex items-center gap-2">
-                <Badge style={{backgroundColor: getStatusColor(selectedNutrient.status)}} className="text-white">
-                  {getStatusIcon(selectedNutrient.status)}
-                  {getStatusText(selectedNutrient.status)}
-                </Badge>
-                <span className="font-bold">{selectedNutrient.percentage}%</span>
+            
+            {/* 상세 정보 */}
+            <div className="grid gap-4">
+              <div className="flex justify-between items-center p-3 bg-gray-50 rounded">
+                <span className="font-medium">현재 섭취량:</span>
+                <span className="font-bold">{selectedNutrient.current}{selectedNutrient.unit}</span>
+              </div>
+              <div className="flex justify-between items-center p-3 bg-green-50 rounded">
+                <span className="font-medium">권장 섭취량:</span>
+                <span className="font-bold text-green-700">{selectedNutrient.rda}{selectedNutrient.unit}</span>
+              </div>
+              <div className="flex justify-between items-center p-3 bg-red-50 rounded">
+                <span className="font-medium">상한 섭취량:</span>
+                <span className="font-bold text-red-700">{selectedNutrient.ul}{selectedNutrient.unit}</span>
+              </div>
+              <div className="flex justify-between items-center p-3 bg-blue-50 rounded">
+                <span className="font-medium">현재 상태:</span>
+                <div className="flex items-center gap-2">
+                  <Badge style={{backgroundColor: getStatusColor(selectedNutrient.status)}} className="text-white">
+                    {getStatusIcon(selectedNutrient.status)}
+                    {getStatusText(selectedNutrient.status)}
+                  </Badge>
+                </div>
               </div>
             </div>
           </div>
@@ -222,9 +230,9 @@ const NutrientAnalysisChart = ({ nutrientStatus, onRecommendationRequest }: Nutr
                     <span>{nutrient.rda}{nutrient.unit}</span>
                   </div>
                   <div className="flex justify-between font-semibold">
-                    <span>달성률:</span>
+                    <span>상태:</span>
                     <span style={{color: getStatusColor(nutrient.status)}}>
-                      {nutrient.percentage}%
+                      {getStatusText(nutrient.status)}
                     </span>
                   </div>
                 </div>
