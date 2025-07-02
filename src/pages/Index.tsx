@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Search, Plus, AlertTriangle, CheckCircle, XCircle, Minus, Pill, Info, ShoppingBag, Star, Award } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, Plus, AlertTriangle, CheckCircle, XCircle, Minus, Pill, Info, ShoppingBag, Star, Award, TrendingUp, ArrowLeft, Heart, Edit, MinusCircle, TrendingDown, Pin, Clipboard } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,6 +8,7 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { useNavigate } from 'react-router-dom';
 import SupplementIntakeForm from '@/components/SupplementIntakeForm';
 import NutrientAnalysisChart from '@/components/NutrientAnalysisChart';
+import { useToast } from "@/components/ui/use-toast";
 
 interface Supplement {
   id: string;
@@ -19,7 +20,7 @@ interface NutrientStatus {
   name: string;
   current: number;
   rda: number;
-  ul: number;
+  ul: number | null;
   status: 'adequate' | 'danger' | 'deficient';
   unit: string;
   percentage: number;
@@ -39,85 +40,151 @@ const Index = () => {
   const navigate = useNavigate();
   const [supplementIntakes, setSupplementIntakes] = useState<any[]>([]);
   const [recommendedProducts, setRecommendedProducts] = useState<RecommendedProduct[]>([]);
+  const { toast } = useToast();
 
-  // 확장된 영양제 데이터
+  // 복용 중인 영양제가 모두 제거되면 추천도 자동으로 비움
+  useEffect(() => {
+    if (supplementIntakes.length === 0) {
+      setRecommendedProducts([]);
+    }
+  }, [supplementIntakes]);
+
+  // 영양소 정보 보기와 동일한 영양소만 포함
   const sampleSupplements: Supplement[] = [
     {
       id: '1',
-      name: '종합비타민 멀티',
-      ingredients: [
-        { name: '비타민 C', amount: '1000', unit: 'mg' },
-        { name: '비타민 D', amount: '400', unit: 'IU' },
-        { name: '비타민 B12', amount: '50', unit: 'mcg' },
-        { name: '아연', amount: '15', unit: 'mg' },
-        { name: '칼슘', amount: '200', unit: 'mg' }
-      ]
-    },
-    {
-      id: '2',
-      name: '비타민 C 1000',
+      name: '비타민 C',
       ingredients: [
         { name: '비타민 C', amount: '1000', unit: 'mg' }
       ]
     },
     {
-      id: '3',
-      name: '오메가-3',
+      id: '2',
+      name: '비타민 D',
       ingredients: [
-        { name: 'EPA', amount: '300', unit: 'mg' },
-        { name: 'DHA', amount: '200', unit: 'mg' }
+        { name: '비타민 D', amount: '1000', unit: 'IU' }
+      ]
+    },
+    {
+      id: '3',
+      name: '칼슘',
+      ingredients: [
+        { name: '칼슘', amount: '500', unit: 'mg' }
       ]
     },
     {
       id: '4',
-      name: '아연 보충제',
+      name: '마그네슘',
       ingredients: [
-        { name: '아연', amount: '20', unit: 'mg' }
-      ]
-    },
-    {
-      id: '5',
-      name: '칼슘 + 마그네슘',
-      ingredients: [
-        { name: '칼슘', amount: '500', unit: 'mg' },
         { name: '마그네슘', amount: '250', unit: 'mg' }
       ]
     },
     {
-      id: '6',
-      name: '루테인 20mg',
+      id: '5',
+      name: '아연',
       ingredients: [
-        { name: '루테인', amount: '20', unit: 'mg' }
+        { name: '아연', amount: '15', unit: 'mg' }
+      ]
+    },
+    {
+      id: '6',
+      name: '오메가-3',
+      ingredients: [
+        { name: '오메가-3', amount: '1000', unit: 'mg' }
       ]
     },
     {
       id: '7',
-      name: '마그네슘 400',
+      name: '프로바이오틱스(유산균)',
       ingredients: [
-        { name: '마그네슘', amount: '400', unit: 'mg' }
+        { name: '프로바이오틱스', amount: '100', unit: '억 CFU' }
       ]
     },
     {
       id: '8',
-      name: '비타민 D3 1000IU',
+      name: '비타민 B1',
       ingredients: [
-        { name: '비타민 D', amount: '1000', unit: 'IU' }
+        { name: '비타민 B1', amount: '1.2', unit: 'mg' }
+      ]
+    },
+    {
+      id: '9',
+      name: '비타민 B2',
+      ingredients: [
+        { name: '비타민 B2', amount: '1.4', unit: 'mg' }
+      ]
+    },
+    {
+      id: '10',
+      name: '비타민 B6',
+      ingredients: [
+        { name: '비타민 B6', amount: '1.5', unit: 'mg' }
+      ]
+    },
+    {
+      id: '11',
+      name: '비타민 B12',
+      ingredients: [
+        { name: '비타민 B12', amount: '2.4', unit: 'mcg' }
+      ]
+    },
+    {
+      id: '12',
+      name: '철분',
+      ingredients: [
+        { name: '철분', amount: '15', unit: 'mg' }
+      ]
+    },
+    {
+      id: '13',
+      name: '엽산',
+      ingredients: [
+        { name: '엽산', amount: '400', unit: 'mcg' }
       ]
     }
   ];
 
-  // 영양소 상태 계산 - 3가지 상태만 사용
-  const calculateNutrientStatus = (): NutrientStatus[] => {
-    const baseNutrients = [
-      { name: '비타민 C', rda: 100, ul: 2000, unit: 'mg' },
-      { name: '비타민 D', rda: 600, ul: 4000, unit: 'IU' },
-      { name: '아연', rda: 8, ul: 40, unit: 'mg' },
-      { name: '칼슘', rda: 1000, ul: 2500, unit: 'mg' },
-      { name: '마그네슘', rda: 400, ul: 350, unit: 'mg' },
-      { name: '루테인', rda: 10, ul: 20, unit: 'mg' }
-    ];
+  // 고정 영양소 이름 배열
+  const fixedNutrientNames = [
+    '비타민 C', '비타민 D', '오메가-3', '칼슘', '마그네슘', '프로바이오틱스'
+  ];
+  // 고정 영양소 목록
+  const fixedNutrients = [
+    { name: '비타민 C', rda: 100, ul: 2000, unit: 'mg' },
+    { name: '비타민 D', rda: 600, ul: 4000, unit: 'IU' },
+    { name: '오메가-3', rda: 1000, ul: 3000, unit: 'mg' },
+    { name: '칼슘', rda: 1000, ul: 2500, unit: 'mg' },
+    { name: '마그네슘', rda: 400, ul: 350, unit: 'mg' },
+    { name: '프로바이오틱스', rda: 100, ul: null, unit: '억 CFU' }
+  ];
 
-    return baseNutrients.map(baseNutrient => {
+  // 영양소 상태 계산 - 고정 6개 + 사용자 복용 영양소(고정 6개 제외)
+  const calculateNutrientStatus = (): NutrientStatus[] => {
+    // 복용 중인 영양제에서 모든 성분명 추출
+    const allUserIngredients = Array.from(new Set(
+      supplementIntakes.flatMap(intake => intake.ingredients.map((ing: any) => ing.name))
+    ));
+    // 고정 영양소 외의 사용자 복용 영양소만 추출
+    const extraNutrients = allUserIngredients.filter(
+      name => !fixedNutrientNames.includes(name)
+    ).map(name => {
+      // 권장량/상한량이 있는 영양소는 값 지정
+      switch (name) {
+        case '아연': return { name, rda: 8, ul: 40, unit: 'mg' };
+        case '루테인': return { name, rda: 10, ul: 20, unit: 'mg' };
+        case '철분': return { name, rda: 10, ul: 45, unit: 'mg' };
+        case '엽산': return { name, rda: 400, ul: 1000, unit: 'mcg' };
+        case '비타민 B1': return { name, rda: 1.2, ul: null, unit: 'mg' };
+        case '비타민 B2': return { name, rda: 1.4, ul: null, unit: 'mg' };
+        case '비타민 B6': return { name, rda: 1.5, ul: 100, unit: 'mg' };
+        case '비타민 B12': return { name, rda: 2.4, ul: null, unit: 'mcg' };
+        default: return { name, rda: 0, ul: null, unit: '' };
+      }
+    });
+    // 최종 영양소 목록: 고정 6개 + 사용자 복용 영양소(중복 없이)
+    const allNutrients = [...fixedNutrients, ...extraNutrients];
+
+    return allNutrients.map(baseNutrient => {
       // 영양제에서 섭취량 계산
       let supplementIntake = 0;
       supplementIntakes.forEach(intake => {
@@ -128,17 +195,15 @@ const Index = () => {
       });
 
       const current = supplementIntake;
-      const percentage = Math.round((current / baseNutrient.rda) * 100);
-      
+      const percentage = baseNutrient.rda ? Math.round((current / baseNutrient.rda) * 100) : 0;
       let status: NutrientStatus['status'] = 'adequate';
-      if (current < baseNutrient.rda) {
-        status = 'deficient'; // 권장량 미만: 부족
-      } else if (current > baseNutrient.ul) {
-        status = 'danger'; // 상한량 초과: 위험
+      if (baseNutrient.rda && current < baseNutrient.rda) {
+        status = 'deficient';
+      } else if (baseNutrient.ul !== null && baseNutrient.ul !== undefined && current > baseNutrient.ul) {
+        status = 'danger';
       } else {
-        status = 'adequate'; // 권장량~상한량: 적정
+        status = 'adequate';
       }
-      
       return {
         ...baseNutrient,
         current,
@@ -227,6 +292,24 @@ const Index = () => {
 
   const nutrientStatus = calculateNutrientStatus();
 
+  // 추천 제품 링크 생성 함수 수정 (kr.iherb.com)
+  function getProductLink(product) {
+    if (product.link && product.link !== '#') return product.link;
+    // kr.iherb.com 검색 링크로 연결
+    return `https://kr.iherb.com/search?kw=${encodeURIComponent(product.name)}`;
+  }
+
+  // 복사 버튼 핸들러
+  function handleCopyProductName(name) {
+    navigator.clipboard.writeText(name).then(() => {
+      toast({
+        title: '복사 완료',
+        description: `"${name}"이(가) 복사되었습니다.`,
+        duration: 1500
+      });
+    });
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
@@ -311,10 +394,30 @@ const Index = () => {
                                         <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-2">
                                           <Pill className="w-6 h-6 text-white" />
                                         </div>
-                                        <h5 className="font-medium text-sm mb-1">{product.name}</h5>
+                                        <div className="flex flex-col items-center">
+                                          <h5 className="font-medium text-sm mb-1 flex items-center gap-1 group">
+                                            {product.name}
+                                            <button
+                                              type="button"
+                                              className="opacity-0 group-hover:opacity-100 transition-opacity ml-1 p-1 rounded hover:bg-gray-100"
+                                              onClick={e => { e.stopPropagation(); handleCopyProductName(product.name); }}
+                                              title="제품명 복사"
+                                            >
+                                              <Clipboard className="w-4 h-4 text-gray-400 hover:text-blue-500" />
+                                            </button>
+                                          </h5>
+                                        </div>
                                         <p className="text-xs text-gray-500">온라인 약국에서 검색</p>
                                       </div>
-                                      <Badge variant="secondary" className="text-xs">
+                                      <a
+                                        href={getProductLink(product)}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-block mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-xs"
+                                      >
+                                        사이트 바로가기
+                                      </a>
+                                      <Badge variant="secondary" className="text-xs ml-2">
                                         추천
                                       </Badge>
                                     </CardContent>
@@ -335,6 +438,15 @@ const Index = () => {
           )}
         </div>
       </div>
+      {/* 푸터: PillSafety 로고 및 슬로건 */}
+      <footer className="w-full py-6 flex flex-col items-center bg-transparent mt-12">
+        <div className="text-lg font-bold text-blue-600 mb-1 flex items-center gap-2">
+          <div className="p-2 bg-blue-500 rounded-full">
+            <Pill className="w-6 h-6 text-white" />
+          </div>
+          PillSafety
+        </div>
+      </footer>
     </div>
   );
 };

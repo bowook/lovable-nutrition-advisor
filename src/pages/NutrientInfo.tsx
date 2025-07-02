@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -63,6 +62,69 @@ const NutrientInfo = () => {
       rda: '1-2g',
       ul: '3g',
       category: '지방산'
+    },
+    {
+      name: '프로바이오틱스(유산균)',
+      function: '장 건강, 소화 개선, 면역력 강화',
+      deficiencySymptoms: '소화불량, 장 트러블, 면역력 저하',
+      richFoods: ['요거트', '김치', '된장', '치즈'],
+      rda: '10억~100억 CFU',
+      ul: '-',
+      category: '기타'
+    },
+    {
+      name: '비타민 B1',
+      function: '에너지 대사, 신경 기능 유지',
+      deficiencySymptoms: '피로, 신경 손상, 각기병',
+      richFoods: ['현미', '콩', '돼지고기', '견과류'],
+      rda: '1.2mg',
+      ul: '-',
+      category: '비타민'
+    },
+    {
+      name: '비타민 B2',
+      function: '에너지 대사, 피부 및 점막 건강',
+      deficiencySymptoms: '피부염, 구내염, 눈 충혈',
+      richFoods: ['계란', '우유', '간', '아몬드'],
+      rda: '1.4mg',
+      ul: '-',
+      category: '비타민'
+    },
+    {
+      name: '비타민 B6',
+      function: '단백질 대사, 신경 전달물질 합성',
+      deficiencySymptoms: '피로, 신경과민, 피부염',
+      richFoods: ['닭고기', '연어', '바나나', '감자'],
+      rda: '1.5mg',
+      ul: '100mg',
+      category: '비타민'
+    },
+    {
+      name: '비타민 B12',
+      function: '적혈구 생성, 신경 기능 유지',
+      deficiencySymptoms: '빈혈, 신경 손상, 피로',
+      richFoods: ['간', '소고기', '계란', '유제품'],
+      rda: '2.4mcg',
+      ul: '-',
+      category: '비타민'
+    },
+    {
+      name: '철분',
+      function: '적혈구 생성, 산소 운반',
+      deficiencySymptoms: '빈혈, 피로, 창백함',
+      richFoods: ['소고기', '간', '시금치', '조개류'],
+      rda: '10-18mg',
+      ul: '45mg',
+      category: '미네랄'
+    },
+    {
+      name: '엽산',
+      function: '세포 분열, 태아 신경관 발달',
+      deficiencySymptoms: '빈혈, 태아 신경관 결손',
+      richFoods: ['시금치', '브로콜리', '콩', '아보카도'],
+      rda: '400mcg',
+      ul: '1000mcg',
+      category: '비타민'
     }
   ];
 
@@ -74,6 +136,16 @@ const NutrientInfo = () => {
       default: return 'bg-gray-100 text-gray-800';
     }
   };
+
+  // 카테고리별로 그룹화
+  const groupedNutrients = nutrients.reduce((acc, nutrient) => {
+    if (!acc[nutrient.category]) acc[nutrient.category] = [];
+    acc[nutrient.category].push(nutrient);
+    return acc;
+  }, {} as Record<string, typeof nutrients>);
+
+  // 카테고리 순서 지정
+  const categoryOrder = ['비타민', '미네랄', '지방산', '기타'];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50">
@@ -91,53 +163,61 @@ const NutrientInfo = () => {
           <p className="text-gray-600">각 영양소의 기능과 필요성을 자세히 알아보세요</p>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {nutrients.map((nutrient, index) => (
-            <Card key={index} className="h-full">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-xl">{nutrient.name}</CardTitle>
-                  <Badge className={getCategoryColor(nutrient.category)}>
-                    {nutrient.category}
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <h4 className="font-semibold text-sm text-gray-700 mb-1">주요 기능</h4>
-                  <p className="text-sm text-gray-600">{nutrient.function}</p>
-                </div>
+        {/* 카테고리별로 그룹화하여 렌더링 */}
+        {categoryOrder.map((category) => (
+          groupedNutrients[category] ? (
+            <div key={category} className="mb-8">
+              <h2 className="text-2xl font-bold mb-4">{category}</h2>
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {groupedNutrients[category].map((nutrient, index) => (
+                  <Card key={index} className="h-full">
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-xl">{nutrient.name}</CardTitle>
+                        <Badge className={getCategoryColor(nutrient.category)}>
+                          {nutrient.category}
+                        </Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div>
+                        <h4 className="font-semibold text-sm text-gray-700 mb-1">주요 기능</h4>
+                        <p className="text-sm text-gray-600">{nutrient.function}</p>
+                      </div>
 
-                <div>
-                  <h4 className="font-semibold text-sm text-gray-700 mb-1">부족 시 증상</h4>
-                  <p className="text-sm text-gray-600">{nutrient.deficiencySymptoms}</p>
-                </div>
+                      <div>
+                        <h4 className="font-semibold text-sm text-gray-700 mb-1">부족 시 증상</h4>
+                        <p className="text-sm text-gray-600">{nutrient.deficiencySymptoms}</p>
+                      </div>
 
-                <div>
-                  <h4 className="font-semibold text-sm text-gray-700 mb-2">풍부한 식품</h4>
-                  <div className="flex flex-wrap gap-1">
-                    {nutrient.richFoods.map((food, idx) => (
-                      <Badge key={idx} variant="outline" className="text-xs">
-                        {food}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
+                      <div>
+                        <h4 className="font-semibold text-sm text-gray-700 mb-2">풍부한 식품</h4>
+                        <div className="flex flex-wrap gap-1">
+                          {nutrient.richFoods.map((food, idx) => (
+                            <Badge key={idx} variant="outline" className="text-xs">
+                              {food}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
 
-                <div className="grid grid-cols-2 gap-2 pt-2 border-t">
-                  <div>
-                    <span className="text-xs text-gray-500">권장량</span>
-                    <p className="text-sm font-medium">{nutrient.rda}</p>
-                  </div>
-                  <div>
-                    <span className="text-xs text-gray-500">상한량</span>
-                    <p className="text-sm font-medium">{nutrient.ul}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                      <div className="grid grid-cols-2 gap-2 pt-2 border-t">
+                        <div>
+                          <span className="text-xs text-gray-500">권장량</span>
+                          <p className="text-sm font-medium">{nutrient.rda}</p>
+                        </div>
+                        <div>
+                          <span className="text-xs text-gray-500">상한량</span>
+                          <p className="text-sm font-medium">{nutrient.ul}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          ) : null
+        ))}
       </div>
     </div>
   );

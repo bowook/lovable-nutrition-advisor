@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -23,6 +22,7 @@ interface SupplementIntakeFormProps {
 const SupplementIntakeForm = ({ supplements, onIntakeUpdate }: SupplementIntakeFormProps) => {
   const [intakes, setIntakes] = useState<SupplementIntake[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const addSupplement = (supplement: any) => {
     const newIntake: SupplementIntake = {
@@ -72,35 +72,50 @@ const SupplementIntakeForm = ({ supplements, onIntakeUpdate }: SupplementIntakeF
     onIntakeUpdate(updatedIntakes);
   };
 
-  const availableSupplements = supplements.filter(
-    supp => !intakes.some(intake => intake.id === supp.id)
-  );
+  const availableSupplements = searchTerm
+    ? supplements.filter(
+        supp => !intakes.some(intake => intake.id === supp.id) &&
+          supp.name.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : supplements.filter(
+        supp => !intakes.some(intake => intake.id === supp.id)
+      ).slice(0, 4);
 
   return (
     <div className="space-y-4">
       {/* 영양제 추가 */}
-      {availableSupplements.length > 0 && (
+      {supplements.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle>복용 중인 영양제 추가</CardTitle>
             <CardDescription>정확한 복용량을 입력하여 분석 정확도를 높여보세요</CardDescription>
           </CardHeader>
           <CardContent>
+            <Input
+              placeholder="영양제 이름을 입력하세요"
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              className="mb-4"
+            />
             <div className="grid gap-2">
-              {availableSupplements.map(supplement => (
-                <div key={supplement.id} className="flex items-center justify-between p-3 border rounded-lg">
-                  <div>
-                    <h5 className="font-medium">{supplement.name}</h5>
-                    <p className="text-sm text-gray-500">
-                      {supplement.ingredients.map((ing: any) => `${ing.name} ${ing.amount}${ing.unit}`).join(', ')}
-                    </p>
+              {availableSupplements.length > 0 ? (
+                availableSupplements.map(supplement => (
+                  <div key={supplement.id} className="flex items-center justify-between p-3 border rounded-lg">
+                    <div>
+                      <h5 className="font-medium">{supplement.name}</h5>
+                      <p className="text-sm text-gray-500">
+                        {supplement.ingredients.map((ing: any) => `${ing.name} ${ing.amount}${ing.unit}`).join(', ')}
+                      </p>
+                    </div>
+                    <Button size="sm" onClick={() => addSupplement(supplement)}>
+                      <Plus className="w-4 h-4 mr-1" />
+                      추가
+                    </Button>
                   </div>
-                  <Button size="sm" onClick={() => addSupplement(supplement)}>
-                    <Plus className="w-4 h-4 mr-1" />
-                    추가
-                  </Button>
-                </div>
-              ))}
+                ))
+              ) : (
+                <div className="text-sm text-gray-400 p-3 text-center">검색 결과가 없습니다.</div>
+              )}
             </div>
           </CardContent>
         </Card>

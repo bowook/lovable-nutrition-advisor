@@ -1,11 +1,10 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer } from 'recharts';
-import { AlertTriangle, CheckCircle, XCircle, Minus, TrendingUp, Pill, ArrowLeft } from 'lucide-react';
+import { AlertTriangle, CheckCircle, XCircle, Minus, TrendingUp, Pill, ArrowLeft, Pin } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 
 interface NutrientStatus {
@@ -23,8 +22,19 @@ interface NutrientAnalysisChartProps {
   onRecommendationRequest?: (deficientNutrients: string[], excessiveNutrients: string[]) => void;
 }
 
+// 고정 영양소 이름 배열(중복 정의 방지 위해 export)
+export const fixedNutrientNames = [
+  '비타민 C', '비타민 D', '오메가-3', '칼슘', '마그네슘', '프로바이오틱스'
+];
+
 const NutrientAnalysisChart = ({ nutrientStatus, onRecommendationRequest }: NutrientAnalysisChartProps) => {
   const [selectedNutrient, setSelectedNutrient] = useState<NutrientStatus | null>(null);
+
+  // 모든 영양소 섭취량이 0인지 확인
+  const allZeroIntake = nutrientStatus.every(n => n.current === 0);
+  if (allZeroIntake) {
+    return null;
+  }
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -210,7 +220,12 @@ const NutrientAnalysisChart = ({ nutrientStatus, onRecommendationRequest }: Nutr
                 onClick={() => setSelectedNutrient(nutrient)}
               >
                 <div className="flex items-center justify-between mb-3">
-                  <h4 className="font-semibold text-gray-800">{nutrient.name}</h4>
+                  <h4 className="font-semibold text-gray-800 flex items-center gap-1">
+                    {fixedNutrientNames.includes(nutrient.name) && (
+                      <Pin className="w-4 h-4 text-blue-400" fill="#60a5fa" />
+                    )}
+                    {nutrient.name}
+                  </h4>
                   <Badge 
                     className="flex items-center gap-1 text-white font-medium" 
                     style={{backgroundColor: getStatusColor(nutrient.status)}}
