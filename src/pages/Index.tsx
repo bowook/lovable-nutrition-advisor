@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Plus, AlertTriangle, CheckCircle, XCircle, Minus, Pill, Info } from 'lucide-react';
+import { Search, Plus, AlertTriangle, CheckCircle, XCircle, Minus, Pill, Info, ShoppingBag, Star, Award } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -319,38 +319,135 @@ const Index = () => {
 
   const nutrientStatus = calculateNutrientStatus();
 
+  // Enhanced recommendation system with specific product suggestions
+  const getProductRecommendations = (deficientNutrients: string[]) => {
+    const productDatabase: { [key: string]: RecommendedProduct } = {
+      '비타민 C': {
+        name: '비타민 C',
+        reason: '면역력 강화와 항산화 작용에 도움',
+        ingredients: ['비타민 C 1000mg'],
+        products: [
+          { name: 'Now Foods 비타민 C 1000mg', link: '#' },
+          { name: 'Solgar 비타민 C 1000mg', link: '#' },
+          { name: 'California Gold Nutrition 비타민 C', link: '#' }
+        ]
+      },
+      '비타민 D': {
+        name: '비타민 D',
+        reason: '뼈 건강과 면역력 증진에 도움',
+        ingredients: ['비타민 D3 2000IU'],
+        products: [
+          { name: 'Now Foods 비타민 D3 2000IU', link: '#' },
+          { name: 'Thorne 비타민 D/K2', link: '#' },
+          { name: 'Life Extension 비타민 D3', link: '#' }
+        ]
+      },
+      '아연': {
+        name: '아연',
+        reason: '면역 기능과 상처 치유에 도움',
+        ingredients: ['아연 15mg'],
+        products: [
+          { name: 'Now Foods 아연 글루코네이트 50mg', link: '#' },
+          { name: 'Thorne 아연 비스글리시네이트 15mg', link: '#' },
+          { name: 'Jarrow Formulas 아연 밸런스', link: '#' }
+        ]
+      },
+      '칼슘': {
+        name: '칼슘',
+        reason: '뼈와 치아 건강에 도움',
+        ingredients: ['칼슘 500mg'],
+        products: [
+          { name: 'Now Foods 칼슘 & 마그네슘', link: '#' },
+          { name: 'Solgar 칼슘 마그네슘 플러스 아연', link: '#' },
+          { name: 'Life Extension 칼슘 D-글루카레이트', link: '#' }
+        ]
+      },
+      '마그네슘': {
+        name: '마그네슘',
+        reason: '근육 기능과 신경 전달에 도움',
+        ingredients: ['마그네슘 400mg'],
+        products: [
+          { name: 'Now Foods 마그네슘 글리시네이트 400mg', link: '#' },
+          { name: 'Doctor\'s Best 마그네슘 글리시네이트', link: '#' },
+          { name: 'KAL 마그네슘 글리시네이트', link: '#' }
+        ]
+      },
+      '루테인': {
+        name: '루테인',
+        reason: '눈 건강과 황반 보호에 도움',
+        ingredients: ['루테인 20mg'],
+        products: [
+          { name: 'Doctor\'s Best 루테인 20mg', link: '#' },
+          { name: 'Now Foods 루테인 10mg', link: '#' },
+          { name: 'Jarrow Formulas 루테인', link: '#' }
+        ]
+      }
+    };
+
+    return deficientNutrients.map(nutrient => productDatabase[nutrient]).filter(Boolean);
+  };
+
   const handleRecommendationRequest = (deficientNutrients: string[], excessiveNutrients: string[]) => {
     console.log('부족한 영양소:', deficientNutrients);
     console.log('과다한 영양소:', excessiveNutrients);
-    // 여기에 맞춤 추천 로직 구현
+    
+    // Get specific product recommendations for deficient nutrients
+    const productRecommendations = getProductRecommendations(deficientNutrients);
+    setRecommendedProducts(productRecommendations);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
       <div className="container mx-auto px-4 py-8">
-        {/* 헤더 */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2 flex items-center justify-center gap-2">
-            <Pill className="w-8 h-8 text-blue-600" />
-            💊 영양제 관리
-          </h1>
-          <p className="text-lg text-gray-600">영양제 과복용 예방 서비스</p>
-          <p className="text-sm text-gray-500 mt-1">건강한 영양제 복용을 위한 스마트한 선택</p>
+        {/* Enhanced Pharmacy Header */}
+        <div className="text-center mb-8 bg-white rounded-2xl shadow-xl p-8 border-2 border-blue-100">
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <div className="p-3 bg-gradient-to-r from-blue-500 to-green-500 rounded-full">
+              <Pill className="w-8 h-8 text-white" />
+            </div>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">
+              스마트 약국
+            </h1>
+            <div className="flex items-center gap-1">
+              <Star className="w-6 h-6 text-yellow-500 fill-current" />
+              <Star className="w-6 h-6 text-yellow-500 fill-current" />
+              <Star className="w-6 h-6 text-yellow-500 fill-current" />
+              <Star className="w-6 h-6 text-yellow-500 fill-current" />
+              <Star className="w-6 h-6 text-yellow-500 fill-current" />
+            </div>
+          </div>
+          <p className="text-xl text-gray-700 font-medium">💊 영양제 과복용 예방 전문 서비스</p>
+          <p className="text-sm text-gray-600 mt-2">건강한 영양제 복용을 위한 스마트한 선택 · 전문 약사 추천</p>
+          
+          <div className="flex items-center justify-center gap-4 mt-6">
+            <Badge className="bg-blue-100 text-blue-800 px-4 py-2">
+              <Award className="w-4 h-4 mr-1" />
+              전문 약사 인증
+            </Badge>
+            <Badge className="bg-green-100 text-green-800 px-4 py-2">
+              <ShoppingBag className="w-4 h-4 mr-1" />
+              맞춤 추천 서비스
+            </Badge>
+          </div>
           
           <Button 
             variant="outline" 
             onClick={() => navigate('/nutrient-info')}
-            className="mt-4"
+            className="mt-4 border-2 border-blue-200 hover:bg-blue-50"
           >
             <Info className="w-4 h-4 mr-2" />
-            영양소 정보 보기
+            영양소 정보 가이드
           </Button>
         </div>
 
         <Tabs defaultValue="analysis" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-8">
-            <TabsTrigger value="analysis">스마트 분석</TabsTrigger>
-            <TabsTrigger value="recommendations">영양제 추천</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 mb-8 bg-white shadow-lg rounded-xl p-1 border-2 border-gray-100">
+            <TabsTrigger value="analysis" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-green-500 data-[state=active]:text-white font-semibold">
+              🔬 스마트 분석
+            </TabsTrigger>
+            <TabsTrigger value="recommendations" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-green-500 data-[state=active]:text-white font-semibold">
+              💊 영양제 추천
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="analysis" className="space-y-6">
@@ -369,6 +466,73 @@ const Index = () => {
                 nutrientStatus={nutrientStatus}
                 onRecommendationRequest={handleRecommendationRequest}
               />
+            )}
+
+            {/* 맞춤 추천 결과 표시 */}
+            {recommendedProducts.length > 0 && (
+              <Card className="bg-white shadow-xl border-2 border-green-200">
+                <CardHeader className="bg-gradient-to-r from-green-50 to-blue-50 rounded-t-lg">
+                  <CardTitle className="flex items-center gap-2 text-green-800">
+                    <Pill className="w-6 h-6" />
+                    부족한 영양소 맞춤 제품 추천
+                  </CardTitle>
+                  <CardDescription className="text-green-600">
+                    부족한 영양소를 보충할 수 있는 전문 제품을 추천해드립니다
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <div className="space-y-8">
+                    {recommendedProducts.map((supplement, index) => (
+                      <div key={index} className="bg-gradient-to-r from-white to-gray-50 p-6 rounded-xl border-2 border-gray-100 shadow-lg">
+                        <div className="mb-4">
+                          <h4 className="font-bold text-xl mb-2 text-gray-800">{supplement.name}</h4>
+                          <p className="text-gray-600 mb-4">{supplement.reason}</p>
+                          <div className="mb-4">
+                            <p className="text-sm font-medium text-gray-700 mb-2">주요 성분:</p>
+                            <div className="flex flex-wrap gap-2">
+                              {supplement.ingredients.map((ingredient, idx) => (
+                                <Badge key={idx} variant="secondary" className="bg-blue-100 text-blue-800">
+                                  {ingredient}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <p className="text-sm font-semibold text-gray-700 mb-4">💊 추천 제품:</p>
+                          <Carousel className="w-full max-w-4xl mx-auto">
+                            <CarouselContent>
+                              {supplement.products.map((product, idx) => (
+                                <CarouselItem key={idx} className="md:basis-1/2 lg:basis-1/3">
+                                  <div className="p-2">
+                                    <Card className="bg-white shadow-lg hover:shadow-xl transition-shadow border-2 border-blue-100">
+                                      <CardContent className="p-6 text-center">
+                                        <div className="mb-4">
+                                          <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-green-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                                            <Pill className="w-8 h-8 text-white" />
+                                          </div>
+                                          <h5 className="font-semibold text-lg mb-2 text-gray-800">{product.name}</h5>
+                                          <p className="text-sm text-gray-600">온라인 약국에서 제품명으로 검색하세요</p>
+                                        </div>
+                                        <Badge className="bg-green-100 text-green-800">
+                                          전문가 추천
+                                        </Badge>
+                                      </CardContent>
+                                    </Card>
+                                  </div>
+                                </CarouselItem>
+                              ))}
+                            </CarouselContent>
+                            <CarouselPrevious className="border-2 border-blue-200" />
+                            <CarouselNext className="border-2 border-blue-200" />
+                          </Carousel>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
             )}
           </TabsContent>
 
