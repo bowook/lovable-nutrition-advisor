@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
-import { Search, Plus, AlertTriangle, CheckCircle, XCircle, Minus, Pill } from 'lucide-react';
+import { Search, Plus, AlertTriangle, CheckCircle, XCircle, Minus, Pill, Info } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import { useNavigate } from 'react-router-dom';
+import PersonalizedRecommendation from '@/components/PersonalizedRecommendation';
+import TrendingSupplements from '@/components/TrendingSupplements';
 
 interface Supplement {
   id: string;
@@ -33,10 +36,12 @@ interface RecommendedProduct {
 }
 
 const Index = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSupplements, setSelectedSupplements] = useState<Supplement[]>([]);
   const [recommendationSearch, setRecommendationSearch] = useState('');
   const [recommendedProducts, setRecommendedProducts] = useState<RecommendedProduct[]>([]);
+  const [personalizedRecommendations, setPersonalizedRecommendations] = useState<any[]>([]);
 
   // 확장된 영양제 데이터
   const sampleSupplements: Supplement[] = [
@@ -227,7 +232,10 @@ const Index = () => {
   };
 
   const searchRecommendations = () => {
-    if (!recommendationSearch.trim()) return;
+    if (!recommendationSearch.trim()) {
+      setRecommendedProducts([]);
+      return;
+    }
 
     const nutrientRecommendations: { [key: string]: RecommendedProduct } = {
       '마그네슘': {
@@ -325,6 +333,15 @@ const Index = () => {
           </h1>
           <p className="text-lg text-gray-600">영양제 과복용 예방 서비스</p>
           <p className="text-sm text-gray-500 mt-1">건강한 영양제 복용을 위한 스마트한 선택</p>
+          
+          <Button 
+            variant="outline" 
+            onClick={() => navigate('/nutrient-info')}
+            className="mt-4"
+          >
+            <Info className="w-4 h-4 mr-2" />
+            영양소 정보 보기
+          </Button>
         </div>
 
         <Tabs defaultValue="analysis" className="w-full">
@@ -358,24 +375,31 @@ const Index = () => {
                 {searchTerm && (
                   <div className="space-y-2">
                     <h4 className="font-medium text-gray-700">검색 결과:</h4>
-                    {filteredSupplements.map((supplement) => (
-                      <div key={supplement.id} className="flex items-center justify-between p-3 border rounded-lg bg-white">
-                        <div>
-                          <h5 className="font-medium">{supplement.name}</h5>
-                          <p className="text-sm text-gray-500">
-                            {supplement.ingredients.map(ing => `${ing.name} ${ing.amount}${ing.unit}`).join(', ')}
-                          </p>
+                    {filteredSupplements.length > 0 ? (
+                      filteredSupplements.map((supplement) => (
+                        <div key={supplement.id} className="flex items-center justify-between p-3 border rounded-lg bg-white">
+                          <div>
+                            <h5 className="font-medium">{supplement.name}</h5>
+                            <p className="text-sm text-gray-500">
+                              {supplement.ingredients.map(ing => `${ing.name} ${ing.amount}${ing.unit}`).join(', ')}
+                            </p>
+                          </div>
+                          <Button
+                            size="sm"
+                            onClick={() => addSupplement(supplement)}
+                            disabled={selectedSupplements.some(s => s.id === supplement.id)}
+                          >
+                            <Plus className="w-4 h-4 mr-1" />
+                            추가
+                          </Button>
                         </div>
-                        <Button
-                          size="sm"
-                          onClick={() => addSupplement(supplement)}
-                          disabled={selectedSupplements.some(s => s.id === supplement.id)}
-                        >
-                          <Plus className="w-4 h-4 mr-1" />
-                          추가
-                        </Button>
+                      ))
+                    ) : (
+                      <div className="text-center py-8 text-gray-500">
+                        <p className="text-lg font-medium">검색된 결과가 없습니다</p>
+                        <p className="text-sm mt-1">다른 검색어를 시도해보세요</p>
                       </div>
-                    ))}
+                    )}
                   </div>
                 )}
               </CardContent>
@@ -457,6 +481,47 @@ const Index = () => {
           </TabsContent>
 
           <TabsContent value="recommendations" className="space-y-6">
+            {/* 개인화된 추천 */}
+            <PersonalizedRecommendation 
+              onRecommendationGenerated={setPersonalizedRecommendations}
+            />
+
+            {/* 개인화된 추천 결과 */}
+            {personalizedRecommendations.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>나만을 위한 추천 결과</CardTitle>
+                  <CardDescription>
+                    입력하신 정보를 바탕으로 추천드리는 영양제입니다
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    {personalizedRecommendations.map((rec, index) => (
+                      <div key={index} className="p-4 border rounded-lg bg-white">
+                        <h4 className="font-medium text-lg mb-2">{rec.name}</h4>
+                        <p className="text-sm text-gray-600 mb-3">{rec.reason}</p>
+                        <div>
+                          <p className="text-xs font-medium text-gray-500 mb-2">추천 제품:</p>
+                          <div className="space-y-1">
+                            {rec.products.map((product: string, idx: number) => (
+                              <Badge key={idx} variant="outline" className="mr-1 mb-1">
+                                {product}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* 요즘 뜨는 영양제 */}
+            <TrendingSupplements />
+
+            {/* 영양제 검색 */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -483,6 +548,19 @@ const Index = () => {
               </CardContent>
             </Card>
 
+            {/* 검색 결과 */}
+            {recommendationSearch && recommendedProducts.length === 0 && (
+              <Card>
+                <CardContent className="py-8">
+                  <div className="text-center text-gray-500">
+                    <p className="text-lg font-medium">검색된 결과가 없습니다</p>
+                    <p className="text-sm mt-1">다른 검색어를 시도해보세요</p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* 추천 제품 표시 */}
             {recommendedProducts.length > 0 && (
               <Card>
                 <CardHeader>
