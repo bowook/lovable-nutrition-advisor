@@ -9,6 +9,9 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { useNavigate } from 'react-router-dom';
 import PersonalizedRecommendation from '@/components/PersonalizedRecommendation';
 import TrendingSupplements from '@/components/TrendingSupplements';
+import SupplementIntakeForm from '@/components/SupplementIntakeForm';
+import DietaryHabitsForm from '@/components/DietaryHabitsForm';
+import NutrientAnalysisChart from '@/components/NutrientAnalysisChart';
 
 interface Supplement {
   id: string;
@@ -23,6 +26,7 @@ interface NutrientStatus {
   ul: number;
   status: 'adequate' | 'caution' | 'danger' | 'deficient';
   unit: string;
+  percentage: number;
 }
 
 interface RecommendedProduct {
@@ -39,6 +43,8 @@ const Index = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSupplements, setSelectedSupplements] = useState<Supplement[]>([]);
+  const [supplementIntakes, setSupplementIntakes] = useState<any[]>([]);
+  const [dietaryHabits, setDietaryHabits] = useState<any>(null);
   const [recommendationSearch, setRecommendationSearch] = useState('');
   const [recommendedProducts, setRecommendedProducts] = useState<RecommendedProduct[]>([]);
   const [personalizedRecommendations, setPersonalizedRecommendations] = useState<any[]>([]);
@@ -109,85 +115,76 @@ const Index = () => {
     }
   ];
 
-  // 확장된 영양소 상태 계산
+  // 식사 습관을 고려한 영양소 상태 계산
   const calculateNutrientStatus = (): NutrientStatus[] => {
-    const nutrients: NutrientStatus[] = [
-      {
-        name: '비타민 C',
-        current: selectedSupplements.reduce((sum, sup) => {
-          const nutrient = sup.ingredients.find(ing => ing.name === '비타민 C');
-          return sum + (nutrient ? parseInt(nutrient.amount) : 0);
-        }, 0),
-        rda: 100,
-        ul: 2000,
-        status: 'adequate',
-        unit: 'mg'
-      },
-      {
-        name: '비타민 D',
-        current: selectedSupplements.reduce((sum, sup) => {
-          const nutrient = sup.ingredients.find(ing => ing.name === '비타민 D');
-          return sum + (nutrient ? parseInt(nutrient.amount) : 0);
-        }, 0),
-        rda: 600,
-        ul: 4000,
-        status: 'adequate',
-        unit: 'IU'
-      },
-      {
-        name: '아연',
-        current: selectedSupplements.reduce((sum, sup) => {
-          const nutrient = sup.ingredients.find(ing => ing.name === '아연');
-          return sum + (nutrient ? parseInt(nutrient.amount) : 0);
-        }, 0),
-        rda: 8,
-        ul: 40,
-        status: 'adequate',
-        unit: 'mg'
-      },
-      {
-        name: '칼슘',
-        current: selectedSupplements.reduce((sum, sup) => {
-          const nutrient = sup.ingredients.find(ing => ing.name === '칼슘');
-          return sum + (nutrient ? parseInt(nutrient.amount) : 0);
-        }, 0),
-        rda: 1000,
-        ul: 2500,
-        status: 'adequate',
-        unit: 'mg'
-      },
-      {
-        name: '마그네슘',
-        current: selectedSupplements.reduce((sum, sup) => {
-          const nutrient = sup.ingredients.find(ing => ing.name === '마그네슘');
-          return sum + (nutrient ? parseInt(nutrient.amount) : 0);
-        }, 0),
-        rda: 400,
-        ul: 350,
-        status: 'adequate',
-        unit: 'mg'
-      },
-      {
-        name: '루테인',
-        current: selectedSupplements.reduce((sum, sup) => {
-          const nutrient = sup.ingredients.find(ing => ing.name === '루테인');
-          return sum + (nutrient ? parseInt(nutrient.amount) : 0);
-        }, 0),
-        rda: 10,
-        ul: 20,
-        status: 'adequate',
-        unit: 'mg'
-      }
+    const baseNutrients = [
+      { name: '비타민 C', rda: 100, ul: 2000, unit: 'mg' },
+      { name: '비타민 D', rda: 600, ul: 4000, unit: 'IU' },
+      { name: '아연', rda: 8, ul: 40, unit: 'mg' },
+      { name: '칼슘', rda: 1000, ul: 2500, unit: 'mg' },
+      { name: '마그네슘', rda: 400, ul: 350, unit: 'mg' },
+      { name: '루테인', rda: 10, ul: 20, unit: 'mg' }
     ];
 
-    return nutrients.map(nutrient => {
-      let status: NutrientStatus['status'] = 'adequate';
-      if (nutrient.current === 0) status = 'deficient';
-      else if (nutrient.current > nutrient.ul) status = 'danger';
-      else if (nutrient.current > nutrient.rda * 1.5) status = 'caution';
-      else if (nutrient.current < nutrient.rda * 0.8) status = 'deficient';
+    return baseNutrients.map(baseNutrient => {
+      // 영양제에서 섭취량 계산
+      let supplementIntake = 0;
+      supplementIntakes.forEach(intake => {
+        const ingredient = intake.ingredients.find((ing: any) => ing.name === baseNutrient.name);
+        if (ingredient) {
+          supplementIntake += ingredient.dailyAmount || 0;
+        }
+      });
+
+      // 식사에서 예상 섭취량 추가 (간단한 추정)
+      let foodIntake = 0;
+      if (dietaryHabits) {
+        const allFoods = [
+          ...dietaryHabits.vegetables,
+          ...dietaryHabits.fruits,
+          ...dietaryHabits.proteins,
+          ...dietaryHabits.grains,
+          ...dietaryHabits.dairy
+        ];
+        
+        // 간단한 영양소 추정 로직
+        allFoods.forEach(food => {
+          const frequency = dietaryHabits.frequency[food] || '거의 안먹음';
+          let multiplier = 0;
+          
+          switch (frequency) {
+            case '거의 매일': multiplier = 0.8; break;
+            case '주 3-4회': multiplier = 0.5; break;
+            case '주 1-2회': multiplier = 0.2; break;
+            default: multiplier = 0; break;
+          }
+
+          // 음식별 영양소 추정값 (매우 간단한 추정)
+          if (baseNutrient.name === '비타민 C' && ['토마토', '브로콜리', '오렌지', '딸기', '키위'].includes(food)) {
+            foodIntake += 20 * multiplier;
+          } else if (baseNutrient.name === '칼슘' && ['우유', '치즈', '요거트'].includes(food)) {
+            foodIntake += 100 * multiplier;
+          } else if (baseNutrient.name === '아연' && ['견과류', '치즈', '계란'].includes(food)) {
+            foodIntake += 2 * multiplier;
+          }
+        });
+      }
+
+      const current = supplementIntake + foodIntake;
+      const percentage = Math.round((current / baseNutrient.rda) * 100);
       
-      return { ...nutrient, status };
+      let status: NutrientStatus['status'] = 'adequate';
+      if (current === 0) status = 'deficient';
+      else if (current > baseNutrient.ul) status = 'danger';
+      else if (current > baseNutrient.rda * 1.5) status = 'caution';
+      else if (current < baseNutrient.rda * 0.8) status = 'deficient';
+      
+      return {
+        ...baseNutrient,
+        current,
+        percentage,
+        status
+      };
     });
   };
 
@@ -322,6 +319,12 @@ const Index = () => {
 
   const nutrientStatus = calculateNutrientStatus();
 
+  const handleRecommendationRequest = (deficientNutrients: string[], excessiveNutrients: string[]) => {
+    console.log('부족한 영양소:', deficientNutrients);
+    console.log('과다한 영양소:', excessiveNutrients);
+    // 여기에 맞춤 추천 로직 구현
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50">
       <div className="container mx-auto px-4 py-8">
@@ -346,137 +349,26 @@ const Index = () => {
 
         <Tabs defaultValue="analysis" className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-8">
-            <TabsTrigger value="analysis">복용 상태 분석</TabsTrigger>
+            <TabsTrigger value="analysis">스마트 분석</TabsTrigger>
             <TabsTrigger value="recommendations">영양제 추천</TabsTrigger>
           </TabsList>
 
           <TabsContent value="analysis" className="space-y-6">
-            {/* 영양제 검색 */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Search className="w-5 h-5" />
-                  복용 중인 영양제 추가
-                </CardTitle>
-                <CardDescription>
-                  현재 복용 중인 영양제를 검색하여 추가해주세요
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex gap-2 mb-4">
-                  <Input
-                    placeholder="영양제 이름을 입력하세요 (예: 종합비타민, 아연, 칼슘, 마그네슘, 루테인)"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="flex-1"
-                  />
-                </div>
-                
-                {searchTerm && (
-                  <div className="space-y-2">
-                    <h4 className="font-medium text-gray-700">검색 결과:</h4>
-                    {filteredSupplements.length > 0 ? (
-                      filteredSupplements.map((supplement) => (
-                        <div key={supplement.id} className="flex items-center justify-between p-3 border rounded-lg bg-white">
-                          <div>
-                            <h5 className="font-medium">{supplement.name}</h5>
-                            <p className="text-sm text-gray-500">
-                              {supplement.ingredients.map(ing => `${ing.name} ${ing.amount}${ing.unit}`).join(', ')}
-                            </p>
-                          </div>
-                          <Button
-                            size="sm"
-                            onClick={() => addSupplement(supplement)}
-                            disabled={selectedSupplements.some(s => s.id === supplement.id)}
-                          >
-                            <Plus className="w-4 h-4 mr-1" />
-                            추가
-                          </Button>
-                        </div>
-                      ))
-                    ) : (
-                      <div className="text-center py-8 text-gray-500">
-                        <p className="text-lg font-medium">검색된 결과가 없습니다</p>
-                        <p className="text-sm mt-1">다른 검색어를 시도해보세요</p>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            {/* 영양제 섭취량 입력 */}
+            <SupplementIntakeForm 
+              supplements={sampleSupplements}
+              onIntakeUpdate={setSupplementIntakes}
+            />
 
-            {/* 선택된 영양제 */}
-            {selectedSupplements.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>현재 복용 중인 영양제</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    {selectedSupplements.map((supplement) => (
-                      <div key={supplement.id} className="flex items-center justify-between p-3 border rounded-lg bg-white">
-                        <div>
-                          <h5 className="font-medium">{supplement.name}</h5>
-                          <p className="text-sm text-gray-500">
-                            {supplement.ingredients.map(ing => `${ing.name} ${ing.amount}${ing.unit}`).join(', ')}
-                          </p>
-                        </div>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => removeSupplement(supplement.id)}
-                        >
-                          제거
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+            {/* 식사 습관 입력 */}
+            <DietaryHabitsForm onHabitsUpdate={setDietaryHabits} />
 
-            {/* 영양소 상태 분석 */}
-            {selectedSupplements.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>영양소 복용 상태 분석</CardTitle>
-                  <CardDescription>
-                    RDA(권장섭취량) 및 UL(상한섭취량) 기준으로 분석된 결과입니다
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                    {nutrientStatus.map((nutrient) => (
-                      <div key={nutrient.name} className="p-4 border rounded-lg bg-white">
-                        <div className="flex items-center justify-between mb-2">
-                          <h4 className="font-medium">{nutrient.name}</h4>
-                          <Badge className={`${getStatusColor(nutrient.status)} flex items-center gap-1`}>
-                            {getStatusIcon(nutrient.status)}
-                            {getStatusText(nutrient.status)}
-                          </Badge>
-                        </div>
-                        <div className="space-y-1 text-sm text-gray-600">
-                          <div>현재 섭취량: {nutrient.current}{nutrient.unit}</div>
-                          <div>권장섭취량: {nutrient.rda}{nutrient.unit}</div>
-                          <div>상한섭취량: {nutrient.ul}{nutrient.unit}</div>
-                        </div>
-                        <div className="mt-2 w-full bg-gray-200 rounded-full h-2">
-                          <div
-                            className={`h-2 rounded-full ${
-                              nutrient.status === 'danger' ? 'bg-red-500' :
-                              nutrient.status === 'caution' ? 'bg-yellow-500' :
-                              nutrient.status === 'adequate' ? 'bg-green-500' : 'bg-gray-400'
-                            }`}
-                            style={{
-                              width: `${Math.min((nutrient.current / nutrient.ul) * 100, 100)}%`
-                            }}
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+            {/* 영양소 분석 차트 */}
+            {supplementIntakes.length > 0 && (
+              <NutrientAnalysisChart 
+                nutrientStatus={nutrientStatus}
+                onRecommendationRequest={handleRecommendationRequest}
+              />
             )}
           </TabsContent>
 
