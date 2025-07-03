@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import SupplementIntakeForm from '@/components/SupplementIntakeForm';
 import NutrientAnalysisChart from '@/components/NutrientAnalysisChart';
 import { useToast } from "@/components/ui/use-toast";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 
 interface Supplement {
   id: string;
@@ -41,6 +42,24 @@ const Index = () => {
   const [supplementIntakes, setSupplementIntakes] = useState<any[]>([]);
   const [recommendedProducts, setRecommendedProducts] = useState<RecommendedProduct[]>([]);
   const { toast } = useToast();
+  const [showNotice, setShowNotice] = useState(false);
+  const [dontShowToday, setDontShowToday] = useState(false);
+
+  // 오늘 날짜 key
+  const todayKey = `notice_closed_${new Date().toISOString().slice(0, 10)}`;
+
+  useEffect(() => {
+    if (!localStorage.getItem(todayKey)) {
+      setShowNotice(true);
+    }
+  }, []);
+
+  const handleCloseNotice = () => {
+    setShowNotice(false);
+    if (dontShowToday) {
+      localStorage.setItem(todayKey, '1');
+    }
+  };
 
   // 복용 중인 영양제가 모두 제거되면 추천도 자동으로 비움
   useEffect(() => {
@@ -312,6 +331,47 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* 공지 모달 */}
+      <Dialog open={showNotice} onOpenChange={setShowNotice}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <AlertTriangle className="w-5 h-5" />
+              국내 폐지/문제 영양제 공지
+            </DialogTitle>
+            <DialogDescription>
+              <div className="my-2 text-gray-800">
+                <b>식약처/언론에 의해 국내에서 문제가 제기되어 폐지된 영양성분/영양제 안내</b>
+                <ul className="list-disc pl-5 mt-2 text-sm">
+                  <li><b>에페드린</b> (Ephedrine): 심혈관계 부작용으로 국내 판매 금지</li>
+                  <li><b>DMAA</b> (1,3-dimethylamylamine): 중추신경계 자극, 국내외 퇴출</li>
+                  <li><b>시부트라민</b>: 체중감량제, 심혈관계 위험성으로 퇴출</li>
+                  <li><b>카바카바</b>: 간 손상 위험성으로 국내외 금지</li>
+                  <li><b>알로에 사포나린</b>: 발암 가능성 제기, 일부 제품 회수</li>
+                </ul>
+                <div className="mt-3 text-xs text-gray-500">※ 본 안내는 참고용 더미 데이터입니다.</div>
+              </div>
+              <div className="flex items-center gap-2 mt-4">
+                <input
+                  id="dontShowToday"
+                  type="checkbox"
+                  checked={dontShowToday}
+                  onChange={e => setDontShowToday(e.target.checked)}
+                  className="accent-red-500"
+                />
+                <label htmlFor="dontShowToday" className="text-sm">오늘 하루 보지 않기</label>
+              </div>
+              <Button
+                variant="destructive"
+                className="mt-4 w-full"
+                onClick={handleCloseNotice}
+              >
+                닫기
+              </Button>
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
       <div className="container mx-auto px-4 py-8">
         {/* Simple Header */}
         <div className="text-center mb-8 bg-white rounded-lg shadow-md p-6">

@@ -1,12 +1,14 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { useNavigate } from 'react-router-dom';
+import { Input } from '@/components/ui/input';
 
 const NutrientInfo = () => {
   const navigate = useNavigate();
+  const [search, setSearch] = useState('');
 
   const nutrients = [
     {
@@ -137,8 +139,38 @@ const NutrientInfo = () => {
     }
   };
 
-  // 카테고리별로 그룹화
-  const groupedNutrients = nutrients.reduce((acc, nutrient) => {
+  const categoryEmoji: Record<string, string> = {
+    '비타민': '💊',
+    '미네랄': '🧂',
+    '지방산': '🥑',
+    '기타': '🌱',
+  };
+
+  const foodEmoji: Record<string, string> = {
+    '오렌지': '🍊', '키위': '🥝', '브로콜리': '🥦', '딸기': '🍓',
+    '연어': '🐟', '계란 노른자': '🥚', '버섯': '🍄', '우유': '🥛',
+    '치즈': '🧀', '멸치': '🐟', '견과류': '🥜', '씨앗': '🌰', '녹색 채소': '🥬', '바나나': '🍌',
+    '굴': '🦪', '소고기': '🐄', '호박씨': '🎃', '렌틸콩': '🫘',
+    '고등어': '🐟', '아마씨': '🌾', '호두': '🌰',
+    '요거트': '🥣', '김치': '🥬', '된장': '🫘',
+    '현미': '🌾', '콩': '🫘', '돼지고기': '🍖',
+    '계란': '🥚', '간': '🫁', '아몬드': '🥜',
+    '닭고기': '🍗', '감자': '🥔', '유제품': '🥛',
+    '시금치': '🥬', '조개류': '🦪', '아보카도': '🥑',
+  };
+
+  const filteredNutrients = useMemo(() => {
+    if (!search.trim()) return nutrients;
+    const lower = search.toLowerCase();
+    return nutrients.filter(nutrient =>
+      nutrient.name.toLowerCase().includes(lower) ||
+      nutrient.function.toLowerCase().includes(lower) ||
+      nutrient.deficiencySymptoms.toLowerCase().includes(lower) ||
+      nutrient.richFoods.some(food => food.toLowerCase().includes(lower))
+    );
+  }, [search, nutrients]);
+
+  const groupedNutrients = filteredNutrients.reduce((acc, nutrient) => {
     if (!acc[nutrient.category]) acc[nutrient.category] = [];
     acc[nutrient.category].push(nutrient);
     return acc;
@@ -160,20 +192,32 @@ const NutrientInfo = () => {
             돌아가기
           </Button>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">영양소 정보</h1>
-          <p className="text-gray-600">각 영양소의 기능과 필요성을 자세히 알아보세요</p>
+          <p className="text-gray-600 mb-4">각 영양소의 기능과 필요성을 자세히 알아보세요</p>
+          <Input
+            placeholder="영양소, 기능, 식품 등으로 검색하세요"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="max-w-md mb-2"
+          />
         </div>
 
         {/* 카테고리별로 그룹화하여 렌더링 */}
         {categoryOrder.map((category) => (
-          groupedNutrients[category] ? (
+          groupedNutrients[category] && groupedNutrients[category].length > 0 ? (
             <div key={category} className="mb-8">
-              <h2 className="text-2xl font-bold mb-4">{category}</h2>
+              <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+                <span>{categoryEmoji[category] || '🔸'}</span>
+                {category}
+              </h2>
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {groupedNutrients[category].map((nutrient, index) => (
                   <Card key={index} className="h-full">
                     <CardHeader>
                       <div className="flex items-center justify-between">
-                        <CardTitle className="text-xl">{nutrient.name}</CardTitle>
+                        <CardTitle className="text-xl flex items-center gap-2">
+                          <span>{categoryEmoji[nutrient.category] || '🔸'}</span>
+                          {nutrient.name}
+                        </CardTitle>
                         <Badge className={getCategoryColor(nutrient.category)}>
                           {nutrient.category}
                         </Badge>
@@ -194,7 +238,8 @@ const NutrientInfo = () => {
                         <h4 className="font-semibold text-sm text-gray-700 mb-2">풍부한 식품</h4>
                         <div className="flex flex-wrap gap-1">
                           {nutrient.richFoods.map((food, idx) => (
-                            <Badge key={idx} variant="outline" className="text-xs">
+                            <Badge key={idx} variant="outline" className="text-xs flex items-center gap-1">
+                              <span>{foodEmoji[food] || '🍽️'}</span>
                               {food}
                             </Badge>
                           ))}
