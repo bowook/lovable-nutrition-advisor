@@ -42,24 +42,7 @@ const Index = () => {
   const [supplementIntakes, setSupplementIntakes] = useState<any[]>([]);
   const [recommendedProducts, setRecommendedProducts] = useState<RecommendedProduct[]>([]);
   const { toast } = useToast();
-  const [showNotice, setShowNotice] = useState(false);
-  const [dontShowToday, setDontShowToday] = useState(false);
-
-  // 오늘 날짜 key
-  const todayKey = `notice_closed_${new Date().toISOString().slice(0, 10)}`;
-
-  useEffect(() => {
-    if (!localStorage.getItem(todayKey)) {
-      setShowNotice(true);
-    }
-  }, []);
-
-  const handleCloseNotice = () => {
-    setShowNotice(false);
-    if (dontShowToday) {
-      localStorage.setItem(todayKey, '1');
-    }
-  };
+  const [showNotice, setShowNotice] = useState(true);
 
   // 복용 중인 영양제가 모두 제거되면 추천도 자동으로 비움
   useEffect(() => {
@@ -329,6 +312,10 @@ const Index = () => {
     });
   }
 
+  const handleCloseNotice = () => {
+    setShowNotice(false);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* 공지 모달 */}
@@ -350,16 +337,6 @@ const Index = () => {
                   <li><b>알로에 사포나린</b>: 발암 가능성 제기, 일부 제품 회수</li>
                 </ul>
                 <div className="mt-3 text-xs text-gray-500">※ 본 안내는 참고용 더미 데이터입니다.</div>
-              </div>
-              <div className="flex items-center gap-2 mt-4">
-                <input
-                  id="dontShowToday"
-                  type="checkbox"
-                  checked={dontShowToday}
-                  onChange={e => setDontShowToday(e.target.checked)}
-                  className="accent-red-500"
-                />
-                <label htmlFor="dontShowToday" className="text-sm">오늘 하루 보지 않기</label>
               </div>
               <Button
                 variant="destructive"
