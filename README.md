@@ -6,7 +6,7 @@
 <https://lovable.dev/projects/b86ea994-ec80-4ad4-9ced-10b1bcc6dd16>
 
 **배포 URL:**  
-https://lovable-nutrition-advisor.lovable.app/
+[https://lovable-nutrition-advisor.lovable.app/](https://bowook.github.io/lovable-nutrition-advisor/)
 
 ---
 
